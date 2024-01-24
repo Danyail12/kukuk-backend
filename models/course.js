@@ -38,6 +38,38 @@ const courseSchema = new mongoose.Schema({
     numOfVideos: {
         type: Number,
         default: 0
+    },
+    lectures: [{
+      title: {
+        type: String,
+        required: [true, "Please add a title"]
+      },
+      description: {
+        type: String,
+        required: [true, "Please add a description"]
+      },
+      video: {
+        type: String,
+        required: [true, "Please add a video"]
+      },
+      url:{
+        type: String,
+        required: [true, "Please add a url"]
+      }
+    }],
+    poster:{
+        public_id: {
+            type: String,
+            required: true
+        },
+        url:{
+            type: String,
+            required: true
+        }
+    },
+    views:{
+        type: Number,
+        default: 0
     }
 })
 

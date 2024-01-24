@@ -1,10 +1,13 @@
-export const forgetPassword = async (req, res) => {
+import User from "../models/user.js";
+   
+   
+   export const forgetPassword = async (req, res) => {
     const userId = parseInt(req.params.id);
     const newPassword = req.body.newPassword;
 
     try {
         
-        const user = users.find(u => u.id === userId);
+        const user = User.find(u => u.id === userId);
 
         if (!user) {
             return res.status(404).json({ message: 'User not found.' });
