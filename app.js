@@ -1,15 +1,11 @@
-import  express  from "express";
-import bodyParser from "body-parser";
-import Jwt  from "jsonwebtoken";
-import bcrypt from "bcrypt";
+import express from "express";
+import User from "./routes/userRoute.js";
+import Courses from "./routes/CourseRoute.js";
+import cookieParser from "cookie-parser";
+import fileUpload from "express-fileupload";
 import dotenv from "dotenv";
-import Course from "./models/course.js";
-import User from "./models/user.js";
-import userRegistration from "./routes/userRegistration.js";
-import userLogin from "./routes/userLogin.js";
-import forgetPassword from "./routes/forgetPassword.js";
-import getCourse from "./routes/CourseRoute.js";
-import createCourse from "./routes/CourseRoute.js";
+import cors from "cors";
+import bodyParser from "body-parser";
 
 dotenv.config({
     path: "./config/config.env",
@@ -18,11 +14,14 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use("api/v1",getCourse)
-app.use("api/v1",createCourse)
-app.use("api/v1",userRegistration)
-app.use("api/v1",userLogin)
-app.use('api/users/',forgetPassword)
-export default app;
+app.use(cookieParser());
+app.use(cors())
+app.use("/api/v1", User);
+app.use("/api/v1", Courses);
 
-// app.use(ErrorMiddleware);
+app.get("/", (req, res) => {
+  res.send("Server is working");
+});
+
+
+export default app;

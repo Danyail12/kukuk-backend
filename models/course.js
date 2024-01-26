@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+import validator from "validator";
 
 const courseSchema = new mongoose.Schema({
     name: {
@@ -14,11 +14,11 @@ const courseSchema = new mongoose.Schema({
     },
     price: {
         type: Number,
-        required: [true, "Please add a price"]
+        // required: [true, "Please add a price"]
     },
     image: {
         type: String,
-        required: [true, "Please add an image"]
+        // required: [true, "Please add an image"]
     },
     category: {
         type: String,
@@ -26,7 +26,7 @@ const courseSchema = new mongoose.Schema({
     },
     duration: {
         type: Number,
-        required: [true, "Please add a duration"]
+        // required: [true, "Please add a duration"]
     },
     createdBy: {
         type:String
@@ -42,7 +42,7 @@ const courseSchema = new mongoose.Schema({
     lectures: [{
       title: {
         type: String,
-        required: [true, "Please add a title"]
+        // required: [true, "Please add a title"]
       },
       description: {
         type: String,
@@ -50,11 +50,11 @@ const courseSchema = new mongoose.Schema({
       },
       video: {
         type: String,
-        required: [true, "Please add a video"]
+        // required: [true, "Please add a video"]
       },
       url:{
         type: String,
-        required: [true, "Please add a url"]
+        // required: [true, "Please add a url"]
       }
     }],
     poster:{
