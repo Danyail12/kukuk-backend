@@ -36,3 +36,12 @@ export const AuthorizedSubscriber = (req, res, next) => {
   }
 
 }
+
+
+export const AuthorizedExpert = (req, res, next) => {
+  if(req.user.role!=="expert"&&req.user.role!=="admin"){
+    res.status(401).json({ success: false, message: "only Experts and admin are allowed" });
+  }else{
+    next();
+  }
+}

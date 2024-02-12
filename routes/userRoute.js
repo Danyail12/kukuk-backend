@@ -18,6 +18,11 @@ import {
   updateUserRole,
   deleteUser,
   deleteProfile,
+  addBookingSession,
+  getBookingSession,
+  getAllExperts,
+  RescheduleBooking,
+  deleteBooking
 } from "../controllers/userController.js";
 import { AuthorizedAdmin, isAuthenticated } from "../middlewares/auth.js";
 
@@ -46,6 +51,11 @@ router.route("/forgetpassword").post(forgetPassword);
 router.route("/resetpassword").put(resetPassword);
 router.route("/addtoplaylist").post(isAuthenticated, addtoplaylist);
 router.route("/removetoplaylist").delete(isAuthenticated, removetoplaylist);
-router.route("/admin/users").get(isAuthenticated,AuthorizedAdmin ,getallusers);
-router.route("/admin/user/:id").put(isAuthenticated,AuthorizedAdmin ,updateUserRole).delete(isAuthenticated,AuthorizedAdmin ,deleteUser);
+router.route("/admin/users").get(getallusers);
+router.route("/admin/user/:id").put(isAuthenticated,AuthorizedAdmin ,updateUserRole).delete(deleteUser);
+router.route("/addBookingSession").post(isAuthenticated, addBookingSession)
+router.route("/bookingSession/:id").delete(isAuthenticated ,deleteBooking)
+router.route("/RescheduleBooking/:id").put(isAuthenticated,RescheduleBooking);
+router.route("/getBookingSession/:id").get(getBookingSession);
+router.route("/getAllExperts").get(isAuthenticated,AuthorizedAdmin ,getAllExperts);
 export default router;

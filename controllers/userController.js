@@ -1,5 +1,9 @@
+import mongoose from "mongoose";
 import course from "../models/course.js";
 import { User } from "../models/users.js";
+import BookingSession from "../models/bookingSession.js";
+import eBooks from "../models/eBooks.js";
+import Expert from "../models/expert.js";
 import { sendMail } from "../utils/sendMail.js";
 import { sendToken } from "../utils/sendToken.js";
 // import course from "../models/course.js";
@@ -42,7 +46,7 @@ export const verify = async (req, res) => {
 
     const user = await User.findById(req.user._id);
 
-    if (user.otp !== otp || user.otp_expiry < Date.now()) {
+    if (user.otp !== otp || user?.otp_expiry < Date.now()) {
       return res
         .status(400)
         .json({ success: false, message: "Invalid OTP or has been Expired" });
@@ -299,11 +303,14 @@ export const addtoplaylist = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
 const Course = await course.findById(req.body.id);
-const itemExist = user.playlist.find((item) => item.course.toString() === Course._id.toString())
+const itemExist = user.playlist.find((item) => item.course.toString() === course._id.toString())
 
 res
   .status(400)
   .json({ success: false, message: "Already Added To Playlist" });
+  if (itemExist) {
+    return res.status(400).json({ success: false, message: "Already Added To Playlist" });
+  }
 
 
 if(!Course){
@@ -359,6 +366,45 @@ res.status(200).json({
  
 
 }
+
+
+export const addtoEbook = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const ebook = await eBooks.findById(req.body.ebookId);
+
+    if (!ebook) {
+      return res.status(404).json({ success: false, message: 'Ebook not found' });
+    }
+
+    // Check if the ebook is already in the fullbook array
+    const isEbookAdded = user.fullbook.some((item) => item.ebooks.toString() === ebook._id.toString());
+
+    if (isEbookAdded) {
+      return res.status(400).json({ success: false, message: 'Ebook already added to fullbook' });
+    }
+
+    // Add the ebook to the fullbook array
+    user.fullbook.push({
+      ebooks: ebook._id,
+      poster: ebook.poster.url,
+    });
+
+    // Save the user document
+    await user.save();
+
+    res.status(200).json({ success: true, message: 'Ebook added to fullbook successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
+  }
+
+}
+
 
 export const getallusers = async (req, res) => {
   try {
@@ -417,4 +463,147 @@ await cloudinary.v2.uploader.destroy(user.avatar.public_id);
         }).json({ success: true,
            message: "User Deleted" });
     }
-  
+
+
+    export const addBookingSession = async (req, res) => {
+      try {
+        const { fullname, email,ownership
+          ,durationofownership,notableFeatures,
+          purpose,additionalDetails,
+          question1,question2,date,
+          time,location,year,model,make,
+          linkToAdvertisement, 
+          sessionDescription,
+          vehicleVin,currentVehicleDescription} = req.body;
+        const userId = await User.findById(req.user._id);
+        const expert = await Expert.findById(req.body.id);
+        // Check if the user exists
+        const user = await User.findById(userId);
+        const experts = await Expert.findById(expert);
+
+        if (!experts) {
+          return res.status(404).json({ success: false, message: 'expert not found' });
+        }
+    
+        if (!user) {
+          return res.status(404).json({ success: false, message: 'User not found' });
+        }
+    
+        // Create a new BookingSession instance
+        const newBookingSession = new BookingSession({
+          fullname, email,ownership
+          ,durationofownership,notableFeatures,
+          purpose,additionalDetails,
+          question1,question2,date,
+          time,location,year,model,make,
+          linkToAdvertisement, 
+          sessionDescription,
+          vehicleVin,currentVehicleDescription,
+          expert: expert._id,
+        });
+    
+        // Save the new booking session to the database
+        await newBookingSession.save();
+    
+        // Add the booking session to the user's bookingsession array
+        user.bookingsession.push({
+          booking: newBookingSession,
+          poster: 'your-poster-value', // Replace with actual poster value
+        });
+        experts.bookingsession.push({
+          booking: newBookingSession,
+          poster: 'your-poster-value', // Replace with actual poster value
+        });
+    
+        // Save the user with the updated bookingsession array
+        await user.save();
+        await experts.save();
+    
+        res.status(201).json({
+          success: true,
+          message: 'Booking session added successfully',
+          bookingSession: newBookingSession,
+        });
+      } catch (error) {
+        console.error('Error adding booking session:', error);
+        res.status(500).json({ success: false, message: 'Something went wrong' });
+      }
+    }
+ 
+    export const getBookingSession = async (req, res) => {
+      try {
+        const userId = req.params.id;
+    
+        // Check if the user exists and populate the bookingsession array
+        const user = await User.findById(userId).populate('bookingsession.booking');
+    
+        if (!user) {
+          return res.status(404).json({ success: false, message: 'User not found' });
+        }
+    
+        res.status(200).json({
+          success: true,
+          bookingSessions: user.bookingsession,
+        });
+      } catch (error) {
+        console.error('Error fetching user booking sessions:', error);
+        res.status(500).json({ success: false, message: 'Something went wrong' });
+      }
+    };
+    export const getAllExperts = async (req, res) => {
+
+      try {
+        const experts = await Expert.find();
+        res.status(200).json({
+          success: true,
+          experts,
+        });
+      } catch (error) {
+        res.status(500).json({
+          success: false,
+          message: error.message,
+        });
+      }
+    }
+
+
+    export const deleteBooking = async(req,res)=>{
+      try {
+        const bookingId = req.params.id;
+    
+        // Check if the booking session exists
+        const bookingSession = await BookingSession.findById(bookingId);
+        if (!bookingSession) {
+          return res.status(404).json({ error: 'Booking session not found' });
+        }
+    
+        // Perform the deletion
+        await BookingSession.findByIdAndDelete(bookingId);
+    
+        res.status(200).json({ message: 'Booking session deleted successfully' });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    }
+
+
+    export const RescheduleBooking = async(req,res)=>{
+      try {
+        const bookingId = req.params.id;
+        const bookingSession= await BookingSession.findById(bookingId);
+        if (!bookingSession) {
+          return res.status(404).json({ error: 'Booking session not found' });
+        }
+
+        bookingSession.date = req.body.date;
+        bookingSession.time = req.body.time;
+        bookingSession.location = req.body.location;
+        await bookingSession.save();
+
+        res.status(200).json({ message: 'Booking session rescheduled successfully' });
+
+      } catch (error) {
+       res.status(500).json({ error: 'Internal Server Error' });
+      }
+    }

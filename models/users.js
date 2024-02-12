@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
   },
   role:{
             type: String,
-            enum: ["user", "admin","inspector"],
+            enum: ["user", "admin"],
             default: "user",
     
         },
@@ -46,7 +46,30 @@ const userSchema = new mongoose.Schema({
       createdAt: Date,
     },
   ],
+  pocketGarrage: [
+    {
+      name: "String",
+       email: "String",
+        description: "String", 
+        expires:"string", 
+        carBrand:"string", 
+        carModel:"string",
+        year:"string",
+        certificates:"String",
+      carImages:"String"
+      ,Registration:"String",
+      InspectionCertificates:"String",
+      historyString:"String",
+      ownershipHistory:"String",
+      invoicesBill:"String"
+      ,AdditionalPhotos:"String",
+      additionalDocuments:"String",
+      createdAt: Date,
+    },
+  ],
 
+
+  
   verified: {
     type: Boolean,
     default: false,
@@ -65,10 +88,51 @@ const userSchema = new mongoose.Schema({
     },
   ]
 ,
-  otp: Number,
-  otp_expiry: Date,
-  resetPasswordOtp: Number,
-  resetPasswordOtpExpiry: Date,
+
+fullbook:[
+  {
+    ebooks: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "eBooks",
+    },
+    poster: String,
+  
+  }
+],
+bookingsession:[
+  {
+    booking: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BookingSession",
+    },
+    poster: String,
+  }
+],
+
+report:[
+  {
+    instanceReport: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Report",
+    },
+    poster: String,
+  }
+],
+
+
+
+notifcation: {
+  type: Array,
+  default: [],
+},
+seennotification: {
+  type: Array,
+  default: [],
+},
+otp: Number,
+otp_expiry: Date,
+resetPasswordOtp: Number,
+resetPasswordOtpExpiry: Date,
 });
 
 userSchema.pre("save", async function (next) {
