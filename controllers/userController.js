@@ -305,20 +305,21 @@ export const resetPassword = async (req, res) => {
 export const addtoplaylist = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
-    const course = await Course.findById(req.body.id); // Corrected variable name to 'course'
-    const itemExist = user.playlist.find((item) => item.course.toString() === course._id.toString());
+    const Course = await course.findById(req.body.id);
+
+    if (!Course) {
+      return res.status(400).json({ success: false, message: "Course Not Found" });
+    }
+
+    const itemExist = user.playlist.find((item) => item.course.toString() === Course._id.toString());
 
     if (itemExist) {
       return res.status(400).json({ success: false, message: "Already Added To Playlist" });
     }
 
-    if (!course) {
-      return res.status(400).json({ success: false, message: "Course Not Found" });
-    }
-
     user.playlist.push({
-      course: course._id, // Corrected variable name to 'course'
-      poster: course.poster.url, // Corrected variable name to 'course'
+      course: Course._id,
+      poster: Course.poster.url,
     });
 
     await user.save();
