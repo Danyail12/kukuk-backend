@@ -262,9 +262,10 @@ export const forgetPassword = async (req, res) => {
 
     await user.save();
 
-    const message = `Your OTP for reseting the password ${otp}. If you did not request for this, please ignore this email.`;
+    const message = `Your OTP for resetting the password is ${otp}. If you did not request for this, please ignore this email.`;
 
-    await sendMail(email, "Request for Reseting Password", message);
+    // Assuming sendMail is correctly implemented
+    await sendMail(email, "Request for Resetting Password", message);
 
     res.status(200).json({ success: true, message: `OTP sent to ${email}` });
   } catch (error) {
@@ -278,7 +279,7 @@ export const resetPassword = async (req, res) => {
 
     const user = await User.findOne({
       resetPasswordOtp: otp,
-      resetPasswordExpiry: { $gt: Date.now() },
+      resetPasswordOtpExpiry: { $gt: Date.now() },
     });
 
     if (!user) {
@@ -286,9 +287,10 @@ export const resetPassword = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Otp Invalid or has been Expired" });
     }
+
     user.password = newPassword;
     user.resetPasswordOtp = null;
-    user.resetPasswordExpiry = null;
+    user.resetPasswordOtpExpiry = null; // Corrected property name
     await user.save();
 
     res
@@ -298,6 +300,7 @@ export const resetPassword = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 export const addtoplaylist = async (req, res) => {
   try {
