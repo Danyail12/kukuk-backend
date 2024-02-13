@@ -52,7 +52,7 @@ export const getEbookPdf = async (req, res) => {
         return res.status(404).json({message:"Ebook not found"})
     }
     // courses.views +=  1;
-    await Ebooks.save();
+    // await Ebooks.save();
 
     res.status(200).json({
         success: true,
@@ -89,7 +89,7 @@ export const addEbook = async (req, res) => {
 
     export const deleteEbook = async (req, res) => {
         const{id} = req.params
-        await course.findByIdAndDelete(id)
+        await eBooks.findByIdAndDelete(id)
         res.status(200).json({
             success: true,
             message: "Ebook deleted successfully"
@@ -97,4 +97,29 @@ export const addEbook = async (req, res) => {
 
     }
 
+
+    export const removeToUser = async (req, res) => {
+        try {
+          const { id } = req.params;
+          const user = await User.findById(req.user._id);
+      
+          // Remove the eBook from user's fullbook array
+          user.fullbook.pull(id);
+      
+          // Save the updated user document
+          await user.save();
+      
+          res.status(200).json({
+            success: true,
+            message: "Ebook removed successfully",
+          });
+        } catch (error) {
+          console.error('Error removing ebook:', error);
+          res.status(500).json({
+            success: false,
+            message: "Something went wrong while removing the ebook",
+          });
+        }
+      };
+      
 

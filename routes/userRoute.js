@@ -22,7 +22,15 @@ import {
   getBookingSession,
   getAllExperts,
   RescheduleBooking,
-  deleteBooking
+  deleteBooking,
+  onsiteInspectionReport,
+  onlineInspectionReport,
+  getOnlineInspection,
+  getOnsiteInspection,
+  deleteOnlineInspection,
+  deleteOnsiteInspection,
+  updateOnsiteInspection,
+  updateOnlineInspection
 } from "../controllers/userController.js";
 import { AuthorizedAdmin, isAuthenticated } from "../middlewares/auth.js";
 
@@ -58,4 +66,13 @@ router.route("/bookingSession/:id").delete(isAuthenticated ,deleteBooking)
 router.route("/RescheduleBooking/:id").put(isAuthenticated,RescheduleBooking);
 router.route("/getBookingSession/:id").get(getBookingSession);
 router.route("/getAllExperts").get(isAuthenticated,AuthorizedAdmin ,getAllExperts);
+router.route("/onsiteInspectionReport").post(isAuthenticated,onsiteInspectionReport);
+router.route("/onlineInspectionReport").post(isAuthenticated,onlineInspectionReport);
+router.route("/getOnlineInspection").get(isAuthenticated,getOnlineInspection);
+router.route("/getOnsiteInspection").get(isAuthenticated,getOnsiteInspection);
+router.route("/deleteOnlineInspection/:id").delete(isAuthenticated,deleteOnlineInspection);
+router.route("/deleteOnsiteInspection/:id").delete(isAuthenticated,deleteOnsiteInspection);
+router.route("/updateOnsiteInspection/:id").put(isAuthenticated, updateOnsiteInspection);
+router.route("/updateOnlineInspection/:id").put(isAuthenticated, updateOnlineInspection);
+
 export default router;

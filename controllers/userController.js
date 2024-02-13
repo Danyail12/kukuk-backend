@@ -6,6 +6,8 @@ import eBooks from "../models/eBooks.js";
 import Expert from "../models/expert.js";
 import { sendMail } from "../utils/sendMail.js";
 import { sendToken } from "../utils/sendToken.js";
+import onlineInspection from "../models/onlineInspection.js";
+import onsiteInspection from "../models/onsiteInspection.js";
 // import course from "../models/course.js";
 import cloudinary from "cloudinary";
 import fs from "fs";
@@ -563,43 +565,434 @@ await cloudinary.v2.uploader.destroy(user.avatar.public_id);
     }
 
 
-    export const deleteBooking = async(req,res)=>{
+    export const deleteBooking = async (req, res) => {
       try {
         const bookingId = req.params.id;
+        const user = await User.findById(req.user._id);
+        const booking = await BookingSession.findById(bookingId);
     
-        // Check if the booking session exists
-        const bookingSession = await BookingSession.findById(bookingId);
-        if (!bookingSession) {
-          return res.status(404).json({ error: 'Booking session not found' });
+        if (!booking) {
+          return res.status(404).json({ error: 'Booking not found' });
         }
     
-        // Perform the deletion
-        await BookingSession.findByIdAndDelete(bookingId);
+        if (!user) {
+          return res.status(404).json({ error: 'User not found' });
+        }
     
-        res.status(200).json({ message: 'Booking session deleted successfully' });
+        await user.updateOne({ $pull: { bookingsession: bookingId } });
+
+        // Remove the booking document
+        await BookingSession.findByIdAndDelete(bookingId);
+        
+        res.status(200).json({ message: 'Booking deleted successfully' });
+    
       } catch (error) {
-        console.error(error);
+        console.error('Error deleting booking:', error);
         res.status(500).json({ error: 'Internal Server Error' });
       }
-    }
+    };
 
-
-    export const RescheduleBooking = async(req,res)=>{
+    export const RescheduleBooking = async (req, res) => {
       try {
         const bookingId = req.params.id;
-        const bookingSession= await BookingSession.findById(bookingId);
+        const bookingSession = await BookingSession.findById(bookingId);
+    
         if (!bookingSession) {
           return res.status(404).json({ error: 'Booking session not found' });
         }
-
+    
         bookingSession.date = req.body.date;
         bookingSession.time = req.body.time;
         bookingSession.location = req.body.location;
+        bookingSession.ownership=req.body.ownership;
+        bookingSession.durationofownership=req.body.durationofownership;
+        bookingSession.notableFeatures=req.body.notableFeatures;
+        bookingSession.purpose=req.body.purpose;
+        bookingSession.additionalDetails=req.body.additionalDetails;
+        bookingSession.question1=req.body.question1;
+        bookingSession.question2=req.body.question2;
+        bookingSession.year=req.body.year;
+        bookingSession.model =req.body.model;
+        bookingSession.make=req.body.make;
+        bookingSession.linkToAdvertisement=req.body.linkToAdvertisement;
+        bookingSession.sessionDescription=req.body.sessionDescription;
+        bookingSession.vehicleVin=req.body.vehicleVin;
+        bookingSession.currentVehicleDescription=req.body.currentVehicleDescription;
+
         await bookingSession.save();
-
+    
+        // Find the corresponding User document and update the bookingsession entry
+        const user = await User.findById(req.user._id);
+        if (user) {
+          const userBookingIndex = user.bookingsession.findIndex((booking) => booking._id.equals(bookingSession._id));
+          if (userBookingIndex !== -1) {
+            user.bookingsession[userBookingIndex].date = req.body.date;
+            user.bookingsession[userBookingIndex].time = req.body.time;
+            user.bookingsession[userBookingIndex].location = req.body.location;
+            await user.save();
+          }
+        }
+    
         res.status(200).json({ message: 'Booking session rescheduled successfully' });
-
+    
       } catch (error) {
-       res.status(500).json({ error: 'Internal Server Error' });
+        console.error('Error rescheduling booking session:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
       }
+    };
+    
+export const onlineInspectionReport = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found' });
     }
+
+    // Check if the expert exists using req.body.id
+    const expert = await Expert.findById(req.body._id);
+    if (!expert) {
+        return res.status(404).json({ success: false, message: 'Expert not found' });
+    }
+    const OnlineInspection = await onlineInspection.create({
+      make: req.body.make,
+      model: req.body.model,
+      year: req.body.year,
+      vechicleVin: req.body.vechicleVin,
+      licensePlates: req.body.licensePlates,
+      handTruck: req.body.handTruck,
+      glass: req.body.glass,
+      wiperBlades: req.body.wiperBlades,
+      Reflectors: req.body.Reflectors,
+      mudFlaps: req.body.mudFlaps,
+      racking : req.body.racking,
+      coldCurtains: req.body.coldCurtains,
+      doorIssues: req.body.doorIssues,
+      insurance: req.body.insurance,
+      headlights: req.body.headlights,
+      turnsignals: req.body.turnsignals,
+      makerlights: req.body.makerlights,
+      brakeLights: req.body.brakeLights,
+      carImages: req.body.carImages,
+      RegistrationImages: req.body.RegistrationImages,
+      Documents: req.body.Documents,
+      expertId :expert,
+      userId : user 
+    });
+
+    await OnlineInspection.save();
+  
+
+    // Add the online inspection to the expert's onlineInspection array
+    expert.onlineInspection.push({
+      make: req.body.make,
+      model: req.body.model,
+      year: req.body.year,
+      vechicleVin: req.body.vechicleVin,
+      licensePlates: req.body.licensePlates,
+      handTruck: req.body.handTruck,
+      glass: req.body.glass,
+      wiperBlades: req.body.wiperBlades,
+      Reflectors: req.body.Reflectors,
+      mudFlaps: req.body.mudFlaps,
+      racking : req.body.racking,
+      coldCurtains: req.body.coldCurtains,
+      doorIssues: req.body.doorIssues,
+      insurance: req.body.insurance,
+      headlights: req.body.headlights,
+      turnsignals: req.body.turnsignals,
+      makerlights: req.body.makerlights,
+      brakeLights: req.body.brakeLights,
+      carImages: req.body.carImages,
+      RegistrationImages: req.body.RegistrationImages,
+      Documents: req.body.Documents,
+      user: user,
+    });
+    await expert.save();
+    user.onlineInspection.push({make: req.body.make,
+      model: req.body.model,
+      year: req.body.year,
+      vechicleVin: req.body.vechicleVin,
+      licensePlates: req.body.licensePlates,
+      handTruck: req.body.handTruck,
+      glass: req.body.glass,
+      wiperBlades: req.body.wiperBlades,
+      Reflectors: req.body.Reflectors,
+      mudFlaps: req.body.mudFlaps,
+      racking : req.body.racking,
+      coldCurtains: req.body.coldCurtains,
+      doorIssues: req.body.doorIssues,
+      insurance: req.body.insurance,
+      headlights: req.body.headlights,
+      turnsignals: req.body.turnsignals,
+      makerlights: req.body.makerlights,
+      brakeLights: req.body.brakeLights,
+      carImages: req.body.carImages,
+      RegistrationImages: req.body.RegistrationImages,
+      Documents: req.body.Documents,
+      expert: expert,
+    });
+    await user.save();
+
+    res.status(201).json({ 
+      success: true,
+      message: 'Online inspection created successfully',
+      
+        OnlineInspection: OnlineInspection 
+        });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+export const onsiteInspectionReport = async (req, res) => {
+  try {
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Check if the expert exists using req.body.id
+    const expert = await Expert.findById(req.body._id);
+    if (!expert) {
+        return res.status(404).json({ success: false, message: 'Expert not found' });
+    }
+
+    const OnsiteInspection = await onsiteInspection.create({
+      make: req.body.make,
+      model: req.body.model,
+      year: req.body.year,
+      vechicleVin: req.body.vechicleVin,
+      licensePlates: req.body.licensePlates,
+      handTruck: req.body.handTruck,
+      glass: req.body.glass,
+      wiperBlades: req.body.wiperBlades,
+      Reflectors: req.body.Reflectors,
+      mudFlaps: req.body.mudFlaps,
+      racking : req.body.racking,
+      coldCurtains: req.body.coldCurtains,
+      doorIssues: req.body.doorIssues,
+      insurance: req.body.insurance,
+      headlights: req.body.headlights,
+      turnsignals: req.body.turnsignals,
+      makerlights: req.body.makerlights,
+      brakeLights: req.body.brakeLights,
+      carImages: req.body.carImages,
+      RegistrationImages: req.body.RegistrationImages,
+      Documents: req.body.Documents,
+      expertId :expert,
+      userId : user 
+      // user: req.user._id,
+    });
+    await OnsiteInspection.save();
+  
+
+    // Add the online inspection to the expert's onlineInspection array
+    expert.onlineInspection.push({
+      make: req.body.make,
+      model: req.body.model,
+      year: req.body.year,
+      vechicleVin: req.body.vechicleVin,
+      licensePlates: req.body.licensePlates,
+      handTruck: req.body.handTruck,
+      glass: req.body.glass,
+      wiperBlades: req.body.wiperBlades,
+      Reflectors: req.body.Reflectors,
+      mudFlaps: req.body.mudFlaps,
+      racking : req.body.racking,
+      coldCurtains: req.body.coldCurtains,
+      doorIssues: req.body.doorIssues,
+      insurance: req.body.insurance,
+      headlights: req.body.headlights,
+      turnsignals: req.body.turnsignals,
+      makerlights: req.body.makerlights,
+      brakeLights: req.body.brakeLights,
+      carImages: req.body.carImages,
+      RegistrationImages: req.body.RegistrationImages,
+      Documents: req.body.Documents,
+      user: req.user._id,
+      });
+    await expert.save();
+
+    user.onsiteInspection.push({make: req.body.make,
+      model: req.body.model,
+      year: req.body.year,
+      vechicleVin: req.body.vechicleVin,
+      licensePlates: req.body.licensePlates,
+      handTruck: req.body.handTruck,
+      glass: req.body.glass,
+      wiperBlades: req.body.wiperBlades,
+      Reflectors: req.body.Reflectors,
+      mudFlaps: req.body.mudFlaps,
+      racking : req.body.racking,
+      coldCurtains: req.body.coldCurtains,
+      doorIssues: req.body.doorIssues,
+      insurance: req.body.insurance,
+      headlights: req.body.headlights,
+      turnsignals: req.body.turnsignals,
+      makerlights: req.body.makerlights,
+      brakeLights: req.body.brakeLights,
+      carImages: req.body.carImages,
+      RegistrationImages: req.body.RegistrationImages,
+      Documents: req.body.Documents,
+      expertId :expert
+  });
+    await user.save();
+
+    res.status(201).json({ 
+      success: true, 
+      message: 'Report submitted successfully',
+      model: req.body.model,
+      year: req.body.year,
+      vechicleVin: req.body.vechicleVin,
+      licensePlates: req.body.licensePlates,
+      handTruck: req.body.handTruck,
+      glass: req.body.glass,
+      wiperBlades: req.body.wiperBlades,
+      Reflectors: req.body.Reflectors,
+      mudFlaps: req.body.mudFlaps,
+      racking : req.body.racking,
+      coldCurtains: req.body.coldCurtains,
+      doorIssues: req.body.doorIssues,
+      insurance: req.body.insurance,
+      headlights: req.body.headlights,
+      turnsignals: req.body.turnsignals,
+      makerlights: req.body.makerlights,
+      brakeLights: req.body.brakeLights,
+      carImages: req.body.carImages,
+      RegistrationImages: req.body.RegistrationImages,
+      Documents: req.body.Documents,
+      expertId :expert,
+      userId : user 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  } 
+}
+
+
+export const getOnlineInspection = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    // const onlineInspection = await onlineInspection.find();
+    if(!user){
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    res.status(200).json({ success: true, data: user.onlineInspection });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+
+export const getOnsiteInspection = async (req, res) => {
+  try {
+    // Assuming that User is your user model
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.status(200).json({ success: true, data: user.onsiteInspection });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+export const deleteOnlineInspection = async (req, res) => {
+  try {
+    const deletedOnlineInspection = await onlineInspection.findByIdAndDelete(req.params.id);
+
+    if (!deletedOnlineInspection) {
+      return res.status(404).json({ success: false, message: 'Online Inspection not found' });
+    }
+
+    // Assuming the user model has an `onlineInspection` array
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $pull: { onlineInspection: req.params.id } },
+      { new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Online Inspection deleted successfully',
+      data: deletedOnlineInspection,
+    });
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+export const deleteOnsiteInspection = async (req, res) => {
+  try {
+    const deletedOnsiteInspection = await onsiteInspection.findByIdAndDelete(req.params.id);
+
+    if (!deletedOnsiteInspection) {
+      return res.status(404).json({ success: false, message: 'Onsite Inspection not found' });
+    }
+
+    // Assuming the user model has an `onsiteInspection` array
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $pull: { onsiteInspection: req.params.id } },
+      { new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Onsite Inspection deleted successfully',
+      data: deletedOnsiteInspection,
+    });
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+export const updateOnsiteInspection = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const updatedOnsiteInspection = await onsiteInspection.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    res.status(200).json({
+      success: true,
+      message: 'Onsite Inspection updated successfully',
+      data: updatedOnsiteInspection,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+
+export const updateOnlineInspection = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const updatedOnlineInspection = await onlineInspection.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    res.status(200).json({
+      success: true,
+      message: 'Online Inspection updated successfully',
+      data: updatedOnlineInspection,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}

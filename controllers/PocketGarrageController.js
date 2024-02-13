@@ -67,3 +67,66 @@ export const createPocketGarrage = async (req, res) => {
           res.status(500).json({ success: false, message: 'Something went wrong' });
         }
       }
+
+
+
+      export const deletePocketGarrage = async (req, res) => {
+        try {
+          const pocket = await PocketGarrage.findByIdAndDelete(req.params.id);
+          const user = await User.findById(req.user._id);
+      
+          if (!pocket) {
+            return res.status(404).json({ success: false, message: 'Pocket garrage not found' });
+          }
+      
+          if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+          }
+      
+          // Remove the pocketGarrage item from the user's array
+          await user.updateOne({ $pull: { pocketGarrage: { _id: req.params.id } } });
+      
+          res.status(200).json({ success: true, message: 'Pocket garrage deleted successfully' });
+        } catch (error) {
+          console.error('Error deleting pocket garrage:', error);
+          res.status(500).json({ success: false, message: 'Something went wrong' });
+        }
+      };
+
+      
+      export const updatePocketGarrage = async (req, res) => {
+        try {
+          const pocket = await PocketGarrage.findByIdAndUpdate(req.params.id, req.body, { new: true });
+      
+          if (!pocket) {
+            return res.status(404).json({ success: false, message: 'Pocket garrage not found' });
+          }
+      
+          // Update the pocketGarrage item in the user's array
+          const user = await User.findOneAndUpdate(
+            { _id: req.user._id, "pocketGarrage._id": req.params.id },
+            { $set: { "pocketGarrage.$": req.body } },
+            { new: true }
+          );
+      
+          res.status(200).json({ success: true, message: 'Pocket garrage updated successfully', pocket: pocket, user: user });
+        } catch (error) {
+          console.error('Error updating pocket garrage:', error);
+          res.status(500).json({ success: false, message: 'Something went wrong' });
+        }
+      };
+
+      
+      export const getPocketGarrage = async (req, res) => {
+        try {
+          // const pocket = await PocketGarrage.findById(req.params.id);
+          const user = await User.findById(req.user._id);
+          if(!user){
+            return res.status(404).json({ success: false, message: 'User not found' });
+          }
+          res.status(200).json({ success: true, message: 'Pocket garrage fetched successfully', pocket: user.pocketGarrage });
+        } catch (error) {
+          console.error('Error getting pocket garrage:', error);
+          res.status(500).json({ success: false, message: 'Something went wrong' });
+        }
+      }

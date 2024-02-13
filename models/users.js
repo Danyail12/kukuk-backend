@@ -67,6 +67,62 @@ const userSchema = new mongoose.Schema({
       createdAt: Date,
     },
   ],
+  onlineInspection: [
+    {
+      make: "String",
+      model: "String",
+      year: "String", 
+      vechicleVin:"string", 
+      body:"string", 
+      licensePlates:"string",
+      handTruck:"string",
+      glass:"String",
+      wiperBlades:"String"
+      ,Reflectors:"String",
+      mudFlaps:"String",
+      racking:"String",
+      coldCurtains:"String",
+      doorIssues:"String"
+      ,insurance:"String",
+      headlights:"String",
+      turnsignals:"String",
+      makerlights:"String",
+      brakeLights:"String",
+      carImages:"String",
+      RegistrationImages:"String",
+      Documents:"String",
+      createdAt: Date,
+      ExpertId:"String",
+    },
+  ],
+  onsiteInspection: [
+    {
+      make: "String",
+      model: "String",
+      year: "String", 
+      vechicleVin:"string", 
+      body:"string", 
+      licensePlates:"string",
+      handTruck:"string",
+      glass:"String",
+      wiperBlades:"String"
+      ,Reflectors:"String",
+      mudFlaps:"String",
+      racking:"String",
+      coldCurtains:"String",
+      doorIssues:"String"
+      ,insurance:"String",
+      headlights:"String",
+      turnsignals:"String",
+      makerlights:"String",
+      brakeLights:"String",
+      carImages:"String",
+      RegistrationImages:"String",
+      Documents:"String",
+      createdAt: Date,
+      ExpertId:"String",
+    },
+  ],
 
 
   
