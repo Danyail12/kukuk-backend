@@ -8,6 +8,7 @@ import { sendMail } from "../utils/sendMail.js";
 import { sendToken } from "../utils/sendToken.js";
 import onlineInspection from "../models/onlineInspection.js";
 import onsiteInspection from "../models/onsiteInspection.js";
+import stats from "../models/Stats.js";
 // import course from "../models/course.js";
 import cloudinary from "cloudinary";
 import fs from "fs";
@@ -111,68 +112,6 @@ export const logout = async (req, res) => {
   }
 };
 
-export const addTask = async (req, res) => {
-  try {
-    const { title, description } = req.body;
-
-    const user = await User.findById(req.user._id);
-
-    user.tasks.push({
-      title,
-      description,
-      completed: false,
-      createdAt: new Date(Date.now()),
-    });
-
-    await user.save();
-
-    res.status(200).json({ success: true, message: "Task added successfully" });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-export const removeTask = async (req, res) => {
-  try {
-    const { taskId } = req.params;
-
-    const user = await User.findById(req.user._id);
-
-    user.tasks = user.tasks.filter(
-      (task) => task._id.toString() !== taskId.toString()
-    );
-
-    await user.save();
-
-    res
-      .status(200)
-      .json({ success: true, message: "Task removed successfully" });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-export const updateTask = async (req, res) => {
-  try {
-    const { taskId } = req.params;
-
-    const user = await User.findById(req.user._id);
-
-    user.task = user.tasks.find(
-      (task) => task._id.toString() === taskId.toString()
-    );
-
-    user.task.completed = !user.task.completed;
-
-    await user.save();
-
-    res
-      .status(200)
-      .json({ success: true, message: "Task Updated successfully" });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
 
 export const getMyProfile = async (req, res) => {
   try {
@@ -436,19 +375,22 @@ export const updateUserRole = async (req, res) => {
 
 
 export const deleteUser = async (req, res) => {
-  const user = await user.findById(req.params.id);
-  if (!user) {
-    return res
-      .status(400)
-      .json({ success: false, message: "User not found" });
-  }
+  try {
+    const foundUser = await User.findById(req.params.id);
 
-await cloudinary.v2.uploader.destroy(user.avatar.public_id);
-      await user.remove();
+    if (!foundUser) {
+      return res.status(400).json({ success: false, message: "User not found" });
+    }
 
-      res.status(200).json({ success: true,
-         message: "User Deleted" });
+    // await cloudinary.v2.uploader.destroy(foundUser.avatar.public_id);
+    // await foundUser.remove();
+
+    res.status(200).json({ success: true, message: "User Deleted" });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
+};
   export const deleteProfile = async (req, res) => {
     const user = await user.findById(req.user._id);
   
@@ -779,16 +721,15 @@ export const onsiteInspectionReport = async (req, res) => {
       brakeLights: req.body.brakeLights,
       carImages: req.body.carImages,
       RegistrationImages: req.body.RegistrationImages,
-      Documents: req.body.Documents,
+      Documents: req.body.Documents, 
       expertId :expert,
       userId : user 
-      // user: req.user._id,
     });
     await OnsiteInspection.save();
   
 
     // Add the online inspection to the expert's onlineInspection array
-    expert.onlineInspection.push({
+    expert.onsiteInspection.push({
       make: req.body.make,
       model: req.body.model,
       year: req.body.year,
@@ -810,11 +751,12 @@ export const onsiteInspectionReport = async (req, res) => {
       carImages: req.body.carImages,
       RegistrationImages: req.body.RegistrationImages,
       Documents: req.body.Documents,
-      user: req.user._id,
+      user: user, 
       });
     await expert.save();
 
-    user.onsiteInspection.push({make: req.body.make,
+    user.onsiteInspection.push({
+      make: req.body.make,
       model: req.body.model,
       year: req.body.year,
       vechicleVin: req.body.vechicleVin,
@@ -835,35 +777,14 @@ export const onsiteInspectionReport = async (req, res) => {
       carImages: req.body.carImages,
       RegistrationImages: req.body.RegistrationImages,
       Documents: req.body.Documents,
-      expertId :expert
+      expert: expert,
   });
     await user.save();
 
     res.status(201).json({ 
       success: true, 
       message: 'Report submitted successfully',
-      model: req.body.model,
-      year: req.body.year,
-      vechicleVin: req.body.vechicleVin,
-      licensePlates: req.body.licensePlates,
-      handTruck: req.body.handTruck,
-      glass: req.body.glass,
-      wiperBlades: req.body.wiperBlades,
-      Reflectors: req.body.Reflectors,
-      mudFlaps: req.body.mudFlaps,
-      racking : req.body.racking,
-      coldCurtains: req.body.coldCurtains,
-      doorIssues: req.body.doorIssues,
-      insurance: req.body.insurance,
-      headlights: req.body.headlights,
-      turnsignals: req.body.turnsignals,
-      makerlights: req.body.makerlights,
-      brakeLights: req.body.brakeLights,
-      carImages: req.body.carImages,
-      RegistrationImages: req.body.RegistrationImages,
-      Documents: req.body.Documents,
-      expertId :expert,
-      userId : user 
+      OnsiteInspection: OnsiteInspection
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -996,3 +917,26 @@ export const updateOnlineInspection = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 }
+
+export const getallBookingSession = async (req, res) => {
+  try {
+    const bookingSessions = await BookingSession.find();
+
+    res.status(200).json({ success: true, data: bookingSessions });
+   
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+
+
+// User.watch().on('change', async () => {
+//   const Stats = await stats.find({}).sort({ createdAt: 'desc' }).limit(1);
+//   const subscription=await User.find({"subscription.status":"active"});
+  // stats[0].users = subscription.length;
+//   stats[0].views = Stats[0].views;
+//   stats[0].subscription = Stats[0].subscription;
+//   stats[0].createdAt = Date.now();
+//   await stats[0].save();
+// })

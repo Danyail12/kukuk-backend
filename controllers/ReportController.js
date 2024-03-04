@@ -7,10 +7,10 @@ import {User} from "../models/users.js";
 export const createReport = async (req, res) => {
   try {
     const expert = await User.findById(req.user._id);
-    const user = await Expert.findById(req.body.id);
+    const user = await Expert.findById(req.params._id);
     const { name, email, description, expires } = req.body;
     
-    if (!experts) {
+    if (!expert) {
       return res.status(404).json({ success: false, message: 'expert not found' });
     }
 

@@ -48,8 +48,14 @@ const eBookSchema = new mongoose.Schema({
         // required: [true, "Please add a description"]
       },
       file: {
-        type: String,
-        // required: [true, "Please add a video"]
+        public_id: {
+          type: String,
+          // required: [true, "Please add a public_id"]
+    },
+    url:{
+      type: String,
+      // required: [true, "Please add a url"]
+    }
       },
       url:{
         type: String,

@@ -1,4 +1,6 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 // Define the expert schema
 const expertSchema = new mongoose.Schema(
@@ -142,6 +144,30 @@ const expertSchema = new mongoose.Schema(
         poster: String,
       },
     ],
+    
+    expertSchedule: [
+      {
+        name: "String",
+        email: "String",
+        description: "String",
+        specailization:"String",
+        date:"String",
+        time:"String",
+        location: {
+          type: {
+            type: String,
+            default: 'Point',
+          },
+          coordinates: {
+            type: [Number],
+            default: [0, 0],
+
+          },
+          expertId: "String"
+        }
+      }
+    ]
+    ,
     reportDelivery:[
       {
         instanceReportDelivery: {
@@ -152,6 +178,10 @@ const expertSchema = new mongoose.Schema(
       }
     ],
     
+    otp: Number,
+    otp_expiry: Date,
+    resetPasswordOtp: Number,
+    resetPasswordOtpExpiry: Date,
   },
   {
     timestamps: true,
@@ -161,5 +191,27 @@ const expertSchema = new mongoose.Schema(
 // Add 2dsphere index on the location field
 expertSchema.index({ location: '2dsphere' });
 
-// Create and export the Expert model
+
+expertSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
+
+expertSchema.methods.getJWTToken = function () {
+  return jwt.sign({ _id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000,
+  });
+};
+expertSchema.methods.comparePassword = async function (enteredPassword) {
+  try {
+    const isMatch = await bcrypt.compare(enteredPassword, this.password);
+    return isMatch;
+  } catch (error) {
+    return false;
+  }
+};
+expertSchema.index({ otp_expiry: 1 }, { expireAfterSeconds: 0 });
 export default mongoose.model('Expert', expertSchema);

@@ -1,16 +1,25 @@
+
+import mongoose from "mongoose"
+
+
 const statsSchema = new mongoose.Schema({
+    user: {
+        type: Number,
+        default: 0
+    },
+    subscription: {
+        type: Number,
+        default: 0
+    },
     views: {
         type: Number,
         default: 0
     },
-    downloads: {
-        type: Number,
-        default: 0
-    },
-    likes: {
-        type: Number,
-        default: 0
-    },
+    createdBy: {
+        type: Date,
+        default: Date.now
+
+    }
     
 })
 

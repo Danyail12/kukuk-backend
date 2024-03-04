@@ -6,6 +6,8 @@ import  Expert from "./routes/ExpertRoute.js";
 import Report from "./routes/ReportRoute.js";
 import Pocket from "./routes/PocketRoute.js";
 import Product from "./routes/ProductRoute.js";
+import other from "./routes/otherRoute.js";
+import payment from "./routes/paymentRoute.js";
 import cron from 'node-cron';
 import {sendMail} from './utils/sendMail.js';
 import report from "./models/report.js";
@@ -13,16 +15,23 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import cors from "cors";
 import bodyParser from "body-parser";
+import Stripe from "stripe";
 
 
 dotenv.config({
     path: "./config/config.env",
 });
+
+const corsOptions = {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH','HEAD'],
+    credentials: true,
+}
 const app = express();
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(cors())
+app.use(cors(corsOptions))
 app.use("/api/v1", User);
 app.use("/api/v1", Courses);
 app.use("/api/v1",ebooking);
@@ -30,6 +39,8 @@ app.use("/api/v1",Expert);
 app.use("/api/v1",Report);
 app.use("/api/v1",Pocket)
 app.use("/api/v1",Product)
+app.use("/api/v1",other)
+app.use("/api/v1",payment)
 
 
 cron.schedule('0 12 * * *', async () => {
@@ -58,6 +69,15 @@ cron.schedule('0 12 * * *', async () => {
   }
 });
 
+
+cron.schedule('0 0 1 * *', async () => {
+  try {
+   await Stats.create({});
+
+}
+  catch (error) {
+    console.log(error);
+  }})
 
 app.get("/", (req, res) => {
   res.send("Server is working");

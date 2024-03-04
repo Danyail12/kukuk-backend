@@ -6,8 +6,8 @@ import { AuthorizedAdmin, AuthorizedSubscriber, isAuthenticated } from "../middl
 const router = express.Router();
 
 router.route("/course").get(getCourse);
-router.route("/createcourse").post(isAuthenticated,AuthorizedAdmin ,createCourse);
-router.route("/course/:id").get(AuthorizedSubscriber,getCourseLectures).post(isAuthenticated,AuthorizedAdmin , addLecture);
-router.route("/deleteCourse/:id").delete(isAuthenticated,AuthorizedAdmin ,deleteCourse);
+router.route("/createcourse").post(createCourse);
+router.route("/course/:id").get(AuthorizedSubscriber,getCourseLectures).post(addLecture);
+router.route("/deleteCourse/:id").delete(deleteCourse);
 
 export default router;

@@ -1,6 +1,6 @@
 
 import cookieParser from "cookie-parser";
-
+import jwt from "jsonwebtoken";
 export const sendToken = (res, user, statusCode, message) => {
     const token = user.getJWTToken();
   
@@ -24,6 +24,11 @@ export const sendToken = (res, user, statusCode, message) => {
       fullbook: user.fullbook,
       bookingsession: user.bookingsession,
       report: user.report,
+      OnlineInspection: user.onlineInspection,
+      token:token ,
+      userId: user._id.toString(),
+      role: user.role
+
     };
   
     res

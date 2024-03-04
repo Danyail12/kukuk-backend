@@ -4,13 +4,13 @@ import validator from "validator";
 const courseSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: [true, "Please add a name"],
-        minlength: [4, "Name must be at least 4 characters"],
-        maxlength: [50, "Name must be less than 50 characters"]
+        required: [true, "Please add a Title"],
+        // minlength: [4, "Name must be at least 4 characters"],
+        // maxlength: [50, "Name must be less than 50 characters"]
     },
     description: {
         type: String,
-        required: [true, "Please add a description"]
+        // required: [true, "Please add a description"]
     },
     price: {
         type: Number,
@@ -22,7 +22,7 @@ const courseSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        required: [true, "Please add a category"]
+        // required: [true, "Please add a category"]
     },
     duration: {
         type: Number,
@@ -46,13 +46,19 @@ const courseSchema = new mongoose.Schema({
       },
       description: {
         type: String,
-        required: [true, "Please add a description"]
+        // required: [true, "Please add a description"]
       },
       video: {
-        type: String,
-        // required: [true, "Please add a video"]
+        public_id: {
+            type: String,
+            // required: [true, "Please add a public_id"]
       },
       url:{
+        type: String,
+        // required: [true, "Please add a url"]
+      }
+    },
+    url: {
         type: String,
         // required: [true, "Please add a url"]
       }

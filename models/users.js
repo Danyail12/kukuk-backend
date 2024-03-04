@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
 
   password: {
     type: String,
-    required: true,
+    // required: true,
     minlength: [8, "Password must be at least 8 characters long"],
     select: false,
   },
@@ -204,11 +204,14 @@ userSchema.methods.getJWTToken = function () {
     expiresIn: process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000,
   });
 };
-
-userSchema.methods.comparePassword = async function (password) {
-  return await bcrypt.compare(password, this.password);
+userSchema.methods.comparePassword = async function (enteredPassword) {
+  try {
+    const isMatch = await bcrypt.compare(enteredPassword, this.password);
+    return isMatch;
+  } catch (error) {
+    return false;
+  }
 };
-
 userSchema.index({ otp_expiry: 1 }, { expireAfterSeconds: 0 });
 
 export const User = mongoose.model("User", userSchema);

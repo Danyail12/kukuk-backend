@@ -6,8 +6,8 @@ import { AuthorizedAdmin, AuthorizedSubscriber, isAuthenticated } from "../middl
 const router = express.Router();
 
 router.route("/ebook").get(getEBooks);
-router.route("/createEbook").post(isAuthenticated,createEbooks);
-router.route("/ebook/:id").get(AuthorizedSubscriber,getEbookPdf).post(isAuthenticated,AuthorizedAdmin ,addEbook );
+router.route("/createEbook").post(createEbooks);
+router.route("/ebook/:id").get(AuthorizedSubscriber,getEbookPdf).post(addEbook );
 router.route("/deleteEbook/:id").delete(isAuthenticated,AuthorizedAdmin ,deleteEbook);
 
 
