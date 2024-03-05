@@ -23,7 +23,7 @@ dotenv.config({
 });
 
 const corsOptions = {
-    origin: 'http://localhost:3000',
+    origin: 'https://kukuk-backend-ealq.vercel.app',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH','HEAD'],
     credentials: true,
 }
