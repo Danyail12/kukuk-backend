@@ -3,7 +3,9 @@ import {adminStats,getaDashboardStats,
     totalData,getBookingSessionsForExpert,
     getallOnlineInspectionForExpert
     ,getallOnsiteInspectionForExpert
-    ,getallPocketGarrageForExpert} from "../controllers/otherController.js";
+    ,getallPocketGarrageForExpert,
+    getAllonsiteInspection
+    ,getAllOnlineInspection} from "../controllers/otherController.js";
 
 import { AuthorizedAdmin, isAuthenticated } from "../middlewares/auth.js";
 
@@ -32,7 +34,8 @@ router.route("/admin/expert/:id/OnsiteInspectionForExpert").get(getallOnsiteInsp
 
 // Route for getting all pocket garages for an expert
 router.route("/admin/expert/:id/getallPocketGarrageForExpert").get(getallPocketGarrageForExpert);
-
+router.route("/admin/getAllonsiteInspection").get(getAllonsiteInspection);
+router.route("/admin/getAllOnlineInspection").get(getAllOnlineInspection);
 
 
 export default router;
