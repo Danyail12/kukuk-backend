@@ -233,8 +233,8 @@ export const getallPocketGarrageForExpert = async (req, res) => {
 
 export const getAllOnlineInspection = async (req, res) => {
     try {
-        const onlineInspection = await onlineInspection.find();
-        res.status(200).json({ success: true, onlineInspection });
+        const onlineInspections = await onlineInspection.find();
+        res.status(200).json({ success: true,onlineInspection: onlineInspections });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -243,8 +243,8 @@ export const getAllOnlineInspection = async (req, res) => {
 
 export const getAllonsiteInspection = async (req, res) => {
     try {
-        const onsiteInspection = await onsiteInspection.find();
-        res.status(200).json({ success: true, onsiteInspection });
+        const onsiteInspections = await onsiteInspection.find();
+        res.status(200).json({ success: true,onsiteInspection: onsiteInspections });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
