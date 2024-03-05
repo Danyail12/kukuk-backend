@@ -23,7 +23,7 @@ dotenv.config({
 });
 
 const corsOptions = {
-    origin: 'https://kukuk-backend-ealq.vercel.app',
+    origin: 'https://admin-panel-eight-delta.vercel.app',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH','HEAD'],
     credentials: true,
 }
