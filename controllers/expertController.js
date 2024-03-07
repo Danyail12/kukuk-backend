@@ -247,6 +247,12 @@ export const login = async (req, res) => {
         .json({ success: false, message: "Invalid Email or Password" });
     }
 
+    if(expert.status === "Unactived") {
+      return res
+        .status(400)
+        .json({ success: false, message: "Your account has been blocked" });
+    }
+
     const isMatch = await expert.comparePassword(password);
 
     if (!isMatch) {
@@ -461,3 +467,37 @@ export const deleteExpertSchedule = async (req, res) => {
   }
 };
 
+
+export const blockExpert = async (req, res) => {
+  try {
+    const expert = await Expert.findById(req.params.id);
+    if (!expert) {
+      return res.status(404).json({ success: false, message: 'Expert not found' });
+    }
+
+    // Update the expert's status
+    expert.status = 'Unactived';
+    await expert.save();
+
+    res.status(200).json({ success: true, message: 'Expert blocked successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const unblockExpert = async (req, res) => {
+  try {
+    const expert = await Expert.findById(req.params.id);
+    if (!expert) {
+      return res.status(404).json({ success: false, message: 'Expert not found' });
+    }
+
+    // Update the expert's status
+    expert.status = 'active'; // Assuming 'active' is the status for unblocked experts
+    await expert.save();
+
+    res.status(200).json({ success: true, message: 'Expert unblocked successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

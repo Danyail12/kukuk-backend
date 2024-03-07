@@ -8,6 +8,8 @@ import course from "../models/course.js";
 import eBooks from "../models/eBooks.js";
 import BookingSession from "../models/bookingSession.js";
 import PocketGarrage from "../models/pocketGarrage.js";
+import product from "../models/Product.js";
+
 
 
 
@@ -248,4 +250,167 @@ export const getAllonsiteInspection = async (req, res) => {
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
+}
+
+
+export const getallPocketGarrage = async (req, res) => {
+    try {
+        const pocketGarrages = await PocketGarrage.find();
+        res.status(200).json({ success: true,pocketGarrage: pocketGarrages });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+
+export const multipleDeleteForProducts = async (req, res) => {
+    const { ids } = req.body;
+    try {
+      const deletedProducts = await product.deleteMany({ _id: { $in: ids } });
+      if(deletedProducts.deletedCount >0) {
+        return res.status(200).json({ success: true, message: `${deletedProducts.deletedCount} records deleted successfully.`});
+      }else {
+        res.status(404).json({ message: 'No records found with the provided IDs.' });
+      }
+      res.status(200).json(deletedProducts);
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  };
+
+  export const multipleDeleteForCourses = async (req, res) => {
+    const { ids } = req.body;
+  
+    try {
+      const deletedCourses = await course.deleteMany({ _id: { $in: ids } });
+  
+      if (deletedCourses.deletedCount > 0) {
+        return res.status(200).json({ success: true, message: `${deletedCourses.deletedCount} records deleted successfully.` });
+      } else {
+        return res.status(404).json({ message: 'No records found with the provided IDs.' });
+      }
+    } catch (error) {
+      console.error('Error deleting courses:', error);
+      return res.status(500).json({ success: false, message: error.message });
+    }
+  };
+   
+  export const multipleDeleteForonlineInspection = async (req, res) => {
+    try {
+        const { ids } = req.body;
+      const deletedProducts = await onlineInspection.deleteMany({ _id: { $in: ids } });
+      if(deletedProducts.deletedCount >0) {
+        return res.status(200).json({ success: true, message: `${deletedProducts.deletedCount} records deleted successfully.`});
+      }else {
+        res.status(404).json({ message: 'No records found with the provided IDs.' });
+      }
+      res.status(200).json(deletedProducts);
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  };
+
+
+  export const multipleDeleteForonsiteInspection = async (req, res) => {
+      const { ids } = req.body;
+    try {
+      const deletedProducts = await onsiteInspection.deleteMany({ _id: { $in: ids } });
+      if(!deletedProducts) {
+        return res.status(404).json({ success: false, message: "Product not found" });
+      }
+      if(deletedProducts.deletedCount >0) {
+        return res.status(200).json({ success: true, message: `${deletedProducts.deletedCount} records deleted successfully.`});
+      }else {
+        res.status(404).json({ message: 'No records found with the provided IDs.' });
+      }
+      res.status(200).json(deletedProducts);
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  };
+
+
+  export const multipleDeleteForpocketGarrage = async (req, res) => {
+      const { ids } = req.body;
+    try {
+      const deletedProducts = await PocketGarrage.deleteMany({ _id: { $in: ids } });
+
+      if(!deletedProducts) {
+        return res.status(404).json({ success: false, message: "Product not found" });
+      }
+
+      if(deletedProducts.deletedCount === 0) {
+        return res.status(404).json({ success: false, message: "Product not found" });
+      }
+
+      if(deletedProducts.deletedCount >0) {
+        return res.status(200).json({ success: true, message: `${deletedProducts.deletedCount} records deleted successfully.`});
+      }else {
+        res.status(404).json({ message: 'No records found with the provided IDs.' });
+      }
+      res.status(200).json(deletedProducts);
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  };
+
+export const multipleDeleteForExpert = async (req, res) => {
+    const { ids } = req.body;
+  try {
+    const deletedProducts = await Expert.deleteMany({ _id: { $in: ids } });
+    if(deletedProducts.deletedCount >0) {
+        return res.status(200).json({ success: true, message: `${deletedProducts.deletedCount} records deleted successfully.`});
+      }else {
+        res.status(404).json({ message: 'No records found with the provided IDs.' });
+      }
+  }
+  catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+
+export const multipleDeleteForBookingSession = async (req, res) => {
+    const { ids } = req.body;
+  try {
+    const deletedProducts = await BookingSession.deleteMany({ _id: { $in: ids } });
+    if(deletedProducts.deletedCount >0) {
+        return res.status(200).json({ success: true, message: `${deletedProducts.deletedCount} records deleted successfully.`});
+    }else{
+        res.status(404).json({ message: 'No records found with the provided IDs.' });
+    }
+  }catch(   error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+
+export const multipleDeleteForUser = async (req, res) => {
+    const { ids } = req.body;
+  try {
+    const deletedProducts = await User.deleteMany({ _id: { $in: ids } });
+    if(deletedProducts.deletedCount >0) {
+        return res.status(200).json({ success: true, message: `${deletedProducts.deletedCount} records deleted successfully.`});
+    }
+    else{
+        res.status(404).json({ message: 'No records found with the provided IDs.' });
+    }
+  }catch(   error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+
+export const multipleDeleteForBooks = async (req, res) => {
+    const { ids } = req.body;
+  try {
+    const deletedProducts = await eBooks.deleteMany({ _id: { $in: ids } });
+    if(deletedProducts.deletedCount >0) {
+        return res.status(200).json({ success: true, message: `${deletedProducts.deletedCount} records deleted successfully.`});
+    }   else{
+        res.status(404).json({ message: 'No records found with the provided IDs.' });
+    }
+  }catch(   error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 }

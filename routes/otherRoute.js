@@ -5,7 +5,22 @@ import {adminStats,getaDashboardStats,
     ,getallOnsiteInspectionForExpert
     ,getallPocketGarrageForExpert,
     getAllonsiteInspection
-    ,getAllOnlineInspection} from "../controllers/otherController.js";
+    ,getAllOnlineInspection,
+    getallPocketGarrage
+    ,multipleDeleteForUser,
+    multipleDeleteForExpert,
+    multipleDeleteForBookingSession,
+    multipleDeleteForpocketGarrage,
+    multipleDeleteForonsiteInspection,
+    multipleDeleteForonlineInspection,
+    multipleDeleteForCourses,
+    multipleDeleteForProducts,
+    multipleDeleteForBooks
+
+
+
+
+} from "../controllers/otherController.js";
 
 import { AuthorizedAdmin, isAuthenticated } from "../middlewares/auth.js";
 
@@ -36,6 +51,16 @@ router.route("/admin/expert/:id/OnsiteInspectionForExpert").get(getallOnsiteInsp
 router.route("/admin/expert/:id/getallPocketGarrageForExpert").get(getallPocketGarrageForExpert);
 router.route("/admin/getAllonsiteInspection").get(getAllonsiteInspection);
 router.route("/admin/getAllOnlineInspection").get(getAllOnlineInspection);
+router.route("/admin/getallPocketGarrage").get(getallPocketGarrage);
+router.route("/admin/multipleDeleteForUser").delete(multipleDeleteForUser);
+router.route("/admin/multipleDeleteForExpert").delete(multipleDeleteForExpert);
+router.route("/admin/multipleDeleteForBookingSession").delete(multipleDeleteForBookingSession);
+router.route("/admin/multipleDeleteForpocketGarrage").delete(multipleDeleteForpocketGarrage);
+router.route("/admin/multipleDeleteForonsiteInspection").delete(multipleDeleteForonsiteInspection);
+router.route("/admin/multipleDeleteForonlineInspection").delete(multipleDeleteForonlineInspection);
+router.route("/admin/multipleDeleteForCourses").delete(multipleDeleteForCourses);
+router.route("/admin/multipleDeleteForProducts").delete(multipleDeleteForProducts);
+router.route("/admin/multipleDeleteForBooks").delete(multipleDeleteForBooks);
 
 
 export default router;

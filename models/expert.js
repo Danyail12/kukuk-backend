@@ -41,7 +41,7 @@ const expertSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      default: 'pending',
+      default: 'Active',
     },
     description: {
       type: String,
@@ -132,6 +132,10 @@ const expertSchema = new mongoose.Schema(
       type: Object,
     },
     verified: {
+      type: Boolean,
+      default: false,
+    },
+    blocked: {
       type: Boolean,
       default: false,
     },

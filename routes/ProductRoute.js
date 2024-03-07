@@ -8,8 +8,8 @@ const router = express.Router();
 
 
 router.route("/products").get(getProducts);
-router.route("/createProduct").post(isAuthenticated,AuthorizedAdmin,createProduct);
-router.route("/deleteProduct/:id").delete(isAuthenticated,AuthorizedAdmin,deleteProduct);
+router.route("/createProduct").post(createProduct);
+router.route("/deleteProduct/:id").delete(deleteProduct);
 
 
 

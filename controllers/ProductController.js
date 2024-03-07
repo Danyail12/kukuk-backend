@@ -17,10 +17,24 @@ export const getProducts = async (req, res) => {
 
 export const createProduct = async (req, res) => {
 
-    const newProduct = new product(req.body);
     try {
-        const savedProduct = await newProduct.save();
-        res.status(200).json(savedProduct);
+        const {name,description,price} = req.body;
+        const image = req.body;
+       const products = new product({
+           name,
+           description,
+           price,
+           image:{
+            public_id:"temp",
+            url: "temp"
+           },
+
+       })
+       await products.save();
+        res.status(200).json({
+            success: true,
+            product: products
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
