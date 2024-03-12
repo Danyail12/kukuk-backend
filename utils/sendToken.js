@@ -27,7 +27,8 @@ export const sendToken = (res, user, statusCode, message) => {
       OnlineInspection: user.onlineInspection,
       token:token ,
       userId: user._id.toString(),
-      role: user.role
+      role: user.role,
+      otp:user.otp,
 
     };
   
