@@ -7,6 +7,7 @@ import {
   nearestExperts,
   getBookingSessionsForExpert,
   getExpertBookingSessions,
+  register,
   login,
   logout,
   verify,
@@ -14,7 +15,7 @@ import {
   getExpertSchedule,
   deleteExpertSchedule,
   blockExpert,
-  unblockExpert
+  unblockExpert,
 } from "../controllers/expertController.js";
 import { AuthorizedAdmin, isAuthenticated, AuthotrizedExpert } from "../middlewares/auth.js";
 
@@ -24,9 +25,9 @@ router.route("/admin/createExpert").post(createExpert);
 router.route("/getExperts").get(getExperts);
 router.route("/admin/expert/:id").put( updateExperts).delete(deleteExperts);
 router.route("/nearestExperts").post(nearestExperts);
-// expertRoutes.js
 router.route("/admin/expert/:id/booking-sessions").get(getBookingSessionsForExpert);
 router.route("/expert/booking-sessions").get(AuthotrizedExpert,getExpertBookingSessions);
+router.route("/expert/register").post(register)
 router.route("/expert/login").post(login)
 router.route("/expert/logout").get(logout)
 router.route("/expert/verify").post(AuthotrizedExpert,verify)
@@ -36,4 +37,10 @@ router.route("/expert/deleteSchedule/:id").delete(isAuthenticated,AuthotrizedExp
 router.route("/expert/active/:id").put( blockExpert)
 router.route("/expert/Unactived/:id").put( unblockExpert)
 
-export default router
+
+
+
+
+
+
+export default router;

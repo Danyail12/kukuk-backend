@@ -2,7 +2,7 @@ import express from "express";
 import User from "./routes/userRoute.js";
 import Courses from "./routes/CourseRoute.js";
 import ebooking from "./routes/EbookRoute.js";
-import  Expert from "./routes/ExpertRoute.js";
+import Expert  from "./routes/ExpertRoute.js";
 import Report from "./routes/ReportRoute.js";
 import Pocket from "./routes/PocketRoute.js";
 import Product from "./routes/ProductRoute.js";
@@ -23,7 +23,7 @@ dotenv.config({
 });
 
 const corsOptions = {
-    origin: 'https://admin-panel-eight-delta.vercel.app',
+    origin: 'https://admin-panel-eight-delta.vercel.app/',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH','HEAD'],
     credentials: true,
 }

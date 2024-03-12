@@ -1,7 +1,7 @@
-import Expert from "../models/expert.js";
 import { sendMail } from "../utils/sendMail.js";
 import { sendToken } from "../utils/sendToken.js";
 import expertSchedule from "../models/expertSchedule.js";
+import Expert from "../models/expert.js";
 
 export const createExpert = async (req, res) => {
     try {
@@ -229,6 +229,36 @@ export const getBookingSessionsForExpert = async (req, res) => {
 };
 
 
+export const register = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    let user = await Expert.findOne({ email });
+
+    if (user) {
+      return res.status(400).json({ success: false, message: "Expert already exists" });
+    }
+
+    const otp = Math.floor(Math.random() * 1000000);
+
+    user = await Expert.create({
+      name,
+      email,
+      password,
+      otp,
+      otp_expiry: new Date(Date.now() + process.env.OTP_EXPIRE * 60 * 1000),
+    });
+
+    await sendMail(email, "Verify your account", `Your OTP is ${otp}`);
+
+    sendToken(res, user, 201, "OTP sent to your email, please verify your account");
+  } catch (error) {
+    console.error(error);  // Log the actual error for debugging
+    res.status(500).json({ success: false, message: "Something went wrong" });
+  }
+};
+
+
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -272,21 +302,21 @@ export const verify = async (req, res) => {
   try {
     const otp = Number(req.body.otp);
 
-    const expert = await Expert.findById(req.user._id);
+    const experts = await Expert.findById(req.user._id);
 
-    if (!expert || expert.otp !== otp || expert.otp_expiry.getTime() < Date.now()) {
+    if (!experts || experts.otp !== otp || experts.otp_expiry.getTime() < Date.now()) {
       return res
         .status(400)
         .json({ success: false, message: "Invalid OTP or has been Expired" });
     }
 
-    expert.verified = true;
-    expert.otp = null;
-    expert.otp_expiry = null;
+    experts.verified = true;
+    experts.otp = null;
+    experts.otp_expiry = null;
 
-    await expert.save();
+    await experts.save();
 
-    sendToken(res, expert, 200, "Account Verified");
+    sendToken(res, experts, 200, "Account Verified");
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
