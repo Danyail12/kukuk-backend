@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-
+import  Expert  from "../models/expert.js";
+import { User } from "../models/users.js";
 
 const expertScheduleSchema = new mongoose.Schema({
     name: {
@@ -38,6 +39,20 @@ const expertScheduleSchema = new mongoose.Schema({
       feesPerConsaltation: {
         type: Number,
       },
+      bookedBy: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        }
+      ],
+      reserved:{
+        type:Boolean,
+        default:false,
+      },
+      createdby:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Expert"
+      }
 })
 
 

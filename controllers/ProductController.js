@@ -7,7 +7,11 @@ export const getProducts = async (req, res) => {
 
     try {
         const products = await product.find();
-        res.status(200).json(products);
+        res.status(200).json({
+            success: true,
+            message: "All Products",
+            data: products
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -18,19 +22,19 @@ export const getProducts = async (req, res) => {
 export const createProduct = async (req, res) => {
 
     try {
-        const {name,description,price} = req.body;
+        const { name, description, price } = req.body;
         const image = req.body;
-       const products = new product({
-           name,
-           description,
-           price,
-           image:{
-            public_id:"temp",
-            url: "temp"
-           },
+        const products = new product({
+            name,
+            description,
+            price,
+            image: {
+                public_id: "temp",
+                url: "temp"
+            },
 
-       })
-       await products.save();
+        })
+        await products.save();
         res.status(200).json({
             success: true,
             product: products
@@ -56,9 +60,9 @@ export const updateProduct = async (req, res) => {
         const updatedProduct = await product.findByIdAndUpdate(
             req.params.id
         );
-            }
-        
-     catch (error) {
-        
+    }
+
+    catch (error) {
+
     }
 }
