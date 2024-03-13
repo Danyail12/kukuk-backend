@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import  Expert  from "../models/expert.js";
+import  expert  from "../models/expert.js";
 import { User } from "../models/users.js";
 
 const expertScheduleSchema = new mongoose.Schema({
@@ -51,7 +51,7 @@ const expertScheduleSchema = new mongoose.Schema({
       },
       createdby:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"Expert"
+        ref:"expert"
       }
 })
 

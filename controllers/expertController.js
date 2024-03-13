@@ -386,6 +386,7 @@ export const ScheduleBooking = async (req, res) => {
       name,
       email,
       specialization,
+      description,
       time,
       date,
       location,
@@ -415,7 +416,8 @@ export const ScheduleBooking = async (req, res) => {
     const ExpertSchedule = new expertSchedule({
       name,
       email,
-      description: specialization, 
+      description,
+       specialization, 
       date, 
       time, 
       location: {
@@ -434,7 +436,8 @@ export const ScheduleBooking = async (req, res) => {
       expertId: expert._id,
       name,
       email,
-      description: specialization,
+      description,
+       specialization,
       date,
       time,
       location,
@@ -447,7 +450,7 @@ export const ScheduleBooking = async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Expert schedule created successfully',
-      expertSchedule,
+       data:ExpertSchedule,
     });
   } catch (error) {
     res.status(500).json({
