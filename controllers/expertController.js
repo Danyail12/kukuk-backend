@@ -65,7 +65,11 @@ export const createExpert = async (req, res) => {
   export const getExperts = async (req, res) => {
     try {
       const experts = await Expert.find();
-      res.status(200).json(experts);
+      res.status(200).json({
+        success: true,
+        message: "Experts fetched successfully",
+        data:  experts
+      });
     } catch (error) {
       res.status(500).json({
         success: false,
@@ -176,15 +180,47 @@ export const createExpert = async (req, res) => {
               type: 'Point',
               coordinates: [lon, lat],
             },
-            key: 'location',
+            key: 'expertSchedule.location',
             maxDistance: parseFloat(10000) * 1609, // Assuming maxDistance is in miles, convert to meters
             distanceField: 'dist.calculated',
             spherical: true,
           },
         },
+        {
+          $match: {
+            'expertSchedule.location': {
+              $geoWithin: {
+                $centerSphere: [
+                  [lon, lat], // Center coordinates
+                  10 / 6371, // 10 kilometers radius (convert to radians)
+                ],
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            expertSchedule: {
+              $filter: {
+                input: '$expertSchedule',
+                as: 'schedule',
+                cond: {
+                  $eq: ['$$schedule.location.coordinates', [lon, lat]],
+                },
+              },
+            },
+          },
+        },
       ]);
   
       if (!nearestExpert || nearestExpert.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'No nearest expert found.',
+        });
+      }
+
+      if(nearestExpert.expertSchedule.reserved === true){
         return res.status(404).json({
           success: false,
           message: 'No nearest expert found.',
@@ -203,6 +239,7 @@ export const createExpert = async (req, res) => {
       });
     }
   };
+  
   // expertController.js
 export const getBookingSessionsForExpert = async (req, res) => {
   try {
@@ -387,8 +424,10 @@ export const ScheduleBooking = async (req, res) => {
       email,
       specialization,
       description,
-      time,
       date,
+      city,
+      country,
+      timing,
       location,
       feesPerConsaltation,
     } = req.body;
@@ -419,7 +458,9 @@ export const ScheduleBooking = async (req, res) => {
       description,
        specialization, 
       date, 
-      time, 
+      city,
+      country,
+      timing,
       location: {
         type: 'Point',
         coordinates: [longitude, latitude],
@@ -439,9 +480,15 @@ export const ScheduleBooking = async (req, res) => {
       description,
        specialization,
       date,
-      time,
-      location,
+      city,
+      country,
+      timing,
+      location: {
+        type: 'Point',
+        coordinates: [longitude, latitude],
+      },
       feesPerConsaltation,
+      _id: expertSchedule._id,
     });
 
     // Save the expert with the new association

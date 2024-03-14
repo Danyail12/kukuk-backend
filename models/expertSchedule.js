@@ -26,6 +26,16 @@ const expertScheduleSchema = new mongoose.Schema({
         type: String,
         // required: true
     },
+    city:{
+        type: String,
+    },
+    country:{
+        type: String,
+    },
+    category:{
+      enum: ['bookingSession', 'onlineInspection', 'onsiteInspection'],
+    }
+,
     location: {
         type: {
           type: String,
@@ -52,6 +62,9 @@ const expertScheduleSchema = new mongoose.Schema({
       createdby:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"expert"
+      },
+      feesPerConsaltation: {
+        type: Number,
       }
 })
 

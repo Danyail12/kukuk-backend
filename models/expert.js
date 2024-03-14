@@ -156,18 +156,28 @@ const expertSchema = new mongoose.Schema(
         description: "String",
         specailization:"String",
         date:"String",
-        time:"String",
+        city: "String",
+        country:"String",
+        timing:"String",
         location: {
           type: {
             type: String,
             default: 'Point',
+          },
+          feesPerConsaltation: {
+            type: Number,
+          },
+          reserved: {
+            type: Boolean,
+            default: false
           },
           coordinates: {
             type: [Number],
             default: [0, 0],
 
           },
-          expertId: "String"
+          expertId: "String",
+          _id: "String",
         }
       }
     ]
@@ -193,7 +203,7 @@ const expertSchema = new mongoose.Schema(
 );
 
 // Add 2dsphere index on the location field
-expertSchema.index({ location: '2dsphere' });
+expertSchema.index({ 'expertSchedule.location': '2dsphere' });
 
 
 expertSchema.pre("save", async function (next) {
