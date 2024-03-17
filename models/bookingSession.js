@@ -4,11 +4,6 @@ import mongoose from 'mongoose';
 // Define the bookingSession schema
 const bookingSessionSchema = new mongoose.Schema({
 
-  
-  // expert: {
-  //   type: String,
-  // },
-
     ownership: {
       type: String,
     },
@@ -46,6 +41,17 @@ const bookingSessionSchema = new mongoose.Schema({
     model: {
       type: String,
     },
+    location: {
+      type: {
+        type: String,
+        default: 'Point',
+      },
+      coordinates: {
+        type: [Number],
+        default: [0, 0],
+
+      },
+    },
     year: {
       type: String,
     },
@@ -61,7 +67,9 @@ const bookingSessionSchema = new mongoose.Schema({
     linkToAdvertisement: {
       type: String,
     },
-});
+} 
+
+)
 
 // Define and export the BookingSession model
 const BookingSession = mongoose.model('BookingSession', bookingSessionSchema);

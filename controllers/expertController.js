@@ -1,5 +1,6 @@
 import { sendMail } from "../utils/sendMail.js";
 import { sendToken } from "../utils/sendToken.js";
+import { expertSendToken } from "../utils/expertSendToken.js";
 import expertSchedule from "../models/expertSchedule.js";
 import Expert from "../models/expert.js";
 
@@ -12,6 +13,7 @@ export const createExpert = async (req, res) => {
         password,
         city,
         country,
+        feesPerConsaltation,
         specialization,
         timing
       } = req.body;
@@ -37,26 +39,19 @@ export const createExpert = async (req, res) => {
           timing,
           city,
           country,
+          feesPerConsaltation
           
         });
   
         await newExpert.save();
+        expertSendToken(res, newExpert, 200, "Expert created successfully");
+        
   
-        res.status(200).json({
-          success: true,
-          message: "Expert created successfully",
-          expert: newExpert,
-        });
-      }
-
-  
-    
-    catch (error) {
-      res.status(500).json({
-        success: false,
-        message: error.message,
-      });
     }
+        catch (error) {
+          console.error(error);  // Log the actual error for debugging
+          res.status(500).json({ success: false, message: error.message });
+        }
   }
 
 
@@ -67,7 +62,7 @@ export const createExpert = async (req, res) => {
       const experts = await Expert.find();
       res.status(200).json({
         success: true,
-        message: "Experts fetched successfully",
+        message: "Experts fetched successfully", 
         data:  experts
       });
     } catch (error) {
@@ -172,8 +167,8 @@ export const createExpert = async (req, res) => {
         });
       }
   
-      // Find the nearest expert based on the given location using $geoNear
-      const nearestExpert = await Expert.aggregate([
+      // Find the nearest experts based on the given location using $geoNear
+      const nearestExperts = await Expert.aggregate([
         {
           $geoNear: {
             near: {
@@ -181,9 +176,9 @@ export const createExpert = async (req, res) => {
               coordinates: [lon, lat],
             },
             key: 'expertSchedule.location',
-            maxDistance: parseFloat(10000) * 1609, // Assuming maxDistance is in miles, convert to meters
             distanceField: 'dist.calculated',
             spherical: true,
+            query: { 'expertSchedule.reserved': false }, // Filter out experts with reserved schedules
           },
         },
         {
@@ -213,24 +208,17 @@ export const createExpert = async (req, res) => {
         },
       ]);
   
-      if (!nearestExpert || nearestExpert.length === 0) {
+      if (!nearestExperts || nearestExperts.length === 0) {
         return res.status(404).json({
           success: false,
-          message: 'No nearest expert found.',
-        });
-      }
-
-      if(nearestExpert.expertSchedule.reserved === true){
-        return res.status(404).json({
-          success: false,
-          message: 'No nearest expert found.',
+          message: 'No nearest experts found.',
         });
       }
   
       res.status(200).json({
         success: true,
-        message: 'Nearest expert found.',
-        expert: nearestExpert[0],
+        message: 'Nearest expert with available schedule found.',
+        expert: nearestExperts, // Return the first nearest expert
       });
     } catch (error) {
       res.status(500).json({
@@ -239,6 +227,7 @@ export const createExpert = async (req, res) => {
       });
     }
   };
+  
   
   // expertController.js
 export const getBookingSessionsForExpert = async (req, res) => {
@@ -266,39 +255,40 @@ export const getBookingSessionsForExpert = async (req, res) => {
 };
 
 
-export const register = async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
+// export const register = async (req, res) => {
+//   try {
+//     const { name, email, password } = req.body;
 
-    let user = await Expert.findOne({ email });
+//     let user = await Expert.findOne({ email });
 
-    if (user) {
-      return res.status(400).json({ success: false, message: "Expert already exists" });
-    }
+//     if (user) {
+//       return res.status(400).json({ success: false, message: "Expert already exists" });
+//     }
 
-    const otp = Math.floor(Math.random() * 1000000);
+//     const otp = Math.floor(Math.random() * 1000000);
 
-    user = await Expert.create({
-      name,
-      email,
-      password,
-      otp,
-      otp_expiry: new Date(Date.now() + process.env.OTP_EXPIRE * 60 * 1000),
-    });
+//     user = await Expert.create({
+//       name,
+//       email,
+//       password,
+//       otp,
+//       otp_expiry: new Date(Date.now() + process.env.OTP_EXPIRE * 60 * 1000),
+//     });
 
-    await sendMail(email, "Verify your account", `Your OTP is ${otp}`);
+//     await sendMail(email, "Verify your account", `Your OTP is ${otp}`);
 
-    sendToken(res, user, 201, "OTP sent to your email, please verify your account");
-  } catch (error) {
-    console.error(error);  // Log the actual error for debugging
-    res.status(500).json({ success: false, message: "Something went wrong" });
-  }
-};
-
+//     sendToken(res, user, 201, "OTP sent to your email, please verify your account");
+//   } catch (error) {
+//     console.error(error);  // Log the actual error for debugging
+//     res.status(500).json({ success: false, message: "Something went wrong" });
+//   }
+// };
 
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log('Email:', email);
+    console.log('Password:', password);
 
     if (!email || !password) {
       return res
@@ -307,6 +297,7 @@ export const login = async (req, res) => {
     }
 
     const expert = await Expert.findOne({ email }).select("+password");
+    console.log('Expert:', expert);
 
     if (!expert) {
       return res
@@ -321,6 +312,7 @@ export const login = async (req, res) => {
     }
 
     const isMatch = await expert.comparePassword(password);
+    console.log('isMatch:', isMatch);
 
     if (!isMatch) {
       return res
@@ -328,36 +320,37 @@ export const login = async (req, res) => {
         .json({ success: false, message: "Invalid Email or Password" });
     }
 
-    sendToken(res, expert, 200, "Login Successful");
+    expertSendToken(res, expert, 200, "Login Successful");
   } catch (error) {
+    console.error(error); // Log any errors for debugging
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
 
-export const verify = async (req, res) => {
-  try {
-    const otp = Number(req.body.otp);
+// export const verify = async (req, res) => {
+//   try {
+//     const otp = Number(req.body.otp);
 
-    const experts = await Expert.findById(req.user._id);
+//     const experts = await Expert.findById(req.user._id);
 
-    if (!experts || experts.otp !== otp || experts.otp_expiry.getTime() < Date.now()) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid OTP or has been Expired" });
-    }
+//     if (!experts || experts.otp !== otp || experts.otp_expiry.getTime() < Date.now()) {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: "Invalid OTP or has been Expired" });
+//     }
 
-    experts.verified = true;
-    experts.otp = null;
-    experts.otp_expiry = null;
+//     experts.verified = true;
+//     experts.otp = null;
+//     experts.otp_expiry = null;
 
-    await experts.save();
+//     await experts.save();
 
-    sendToken(res, experts, 200, "Account Verified");
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
+//     sendToken(res, experts, 200, "Account Verified");
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
 
 export const logout = async (req, res) => {
   try {

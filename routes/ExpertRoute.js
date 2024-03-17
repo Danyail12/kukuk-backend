@@ -7,10 +7,8 @@ import {
   nearestExperts,
   getBookingSessionsForExpert,
   getExpertBookingSessions,
-  register,
   login,
   logout,
-  verify,
   ScheduleBooking,
   getExpertSchedule,
   deleteExpertSchedule,
@@ -27,10 +25,10 @@ router.route("/admin/expert/:id").put( updateExperts).delete(deleteExperts);
 router.route("/nearestExperts").post(nearestExperts);
 router.route("/admin/expert/:id/booking-sessions").get(getBookingSessionsForExpert);
 router.route("/expert/booking-sessions").get(AuthotrizedExpert,getExpertBookingSessions);
-router.route("/expert/register").post(register)
+// router.route("/expert/register").post(register)
 router.route("/expert/login").post(login)
 router.route("/expert/logout").get(logout)
-router.route("/expert/verify").post(AuthotrizedExpert,verify)
+// router.route("/expert/verify").post(AuthotrizedExpert,verify)
 router.route("/expert/scheduleBooking").post(isAuthenticated,AuthotrizedExpert, ScheduleBooking)
 router.route("/expert/getSchedule").get(isAuthenticated,AuthotrizedExpert, getExpertSchedule)
 router.route("/expert/deleteSchedule/:id").delete(isAuthenticated,AuthotrizedExpert, deleteExpertSchedule)

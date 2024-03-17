@@ -17,16 +17,6 @@ const expertSchema = new mongoose.Schema(
     email: {
       type: String,
     },
-    location: {
-      type: {
-        type: String,
-        default: 'Point',
-      },
-      coordinates: {
-        type: [Number],
-        default: [0, 0],
-      },
-    },
     country: {
       type: String,
     },
@@ -46,8 +36,8 @@ const expertSchema = new mongoose.Schema(
     description: {
       type: String,
     },
-    feesPerCunsaltation: {
-      type: Number,
+    feesPerConsaltation: {
+      type: String,
     },
     pocketGarrage: [
       {
@@ -86,6 +76,17 @@ const expertSchema = new mongoose.Schema(
         carImages:"String",
         RegistrationImages:"String",
         Documents:"String",
+        location: {
+          type: {
+            type: String,
+            default: 'Point',
+          },
+          coordinates: {
+            type: [Number],
+            default: [0, 0],
+
+          }
+        },
         createdAt: Date,
         userId:"String",
       },
@@ -159,17 +160,14 @@ const expertSchema = new mongoose.Schema(
         city: "String",
         country:"String",
         timing:"String",
+        reserved: {
+          type: Boolean,
+          default: false
+        },
         location: {
           type: {
             type: String,
             default: 'Point',
-          },
-          feesPerConsaltation: {
-            type: Number,
-          },
-          reserved: {
-            type: Boolean,
-            default: false
           },
           coordinates: {
             type: [Number],
@@ -202,23 +200,20 @@ const expertSchema = new mongoose.Schema(
   }
 );
 
-// Add 2dsphere index on the location field
-expertSchema.index({ 'expertSchedule.location': '2dsphere' });
+expertSchema.index({ location: '2dsphere' });
+
+
 
 
 expertSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-
+  if (!this.isModified("password")) 
+  {
+    return next();
+  }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
-
-expertSchema.methods.getJWTToken = function () {
-  return jwt.sign({ _id: this._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000,
-  });
-};
 expertSchema.methods.comparePassword = async function (enteredPassword) {
   try {
     const isMatch = await bcrypt.compare(enteredPassword, this.password);
@@ -226,6 +221,12 @@ expertSchema.methods.comparePassword = async function (enteredPassword) {
   } catch (error) {
     return false;
   }
+}
+
+expertSchema.methods.getJWTToken = function () {
+  const token =  jwt.sign({ _id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000,
+  });
+  return token;
 };
-expertSchema.index({ otp_expiry: 1 }, { expireAfterSeconds: 0 });
 export default mongoose.model('Expert', expertSchema);

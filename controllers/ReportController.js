@@ -49,3 +49,32 @@ export const createReport = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+
+export const deleteReport = async (req, res) => {
+  try {
+    const report = await Report.findByIdAndDelete(req.params._id);
+    res.status(200).json({ success: true, message: 'Report deleted successfully' });
+
+  }
+  catch(error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
+
+
+export const updateReport = async (req, res) => {
+  try {
+    const report = await Report.findByIdAndUpdate(req.params._id, req.body, {
+      new: true,
+    })
+    res.status(200).json({ success: true, message: 'Report updated successfully', report });
+  }
+  catch(error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+

@@ -12,6 +12,7 @@ import stats from "../models/Stats.js";
 // import course from "../models/course.js";
 import cloudinary from "cloudinary";
 import fs from "fs";
+import expertSchedule from "../models/expertSchedule.js";
 
 export const register = async (req, res) => {
   try {
@@ -407,69 +408,130 @@ export const deleteUser = async (req, res) => {
 
     export const addBookingSession = async (req, res) => {
       try {
-        const { fullname, email,ownership
-          ,durationofownership,notableFeatures,
-          purpose,additionalDetails,
-          question1,question2,date,
-          time,location,year,model,make,
-          linkToAdvertisement, 
+        const {
+          fullname,
+          email,
+          ownership,
+          durationofownership,
+          notableFeatures,
+          purpose,
+          additionalDetails,
+          question1,
+          question2,
+          date,
+          time,
+          location,
+          year,
+          model,
+          make,
+          linkToAdvertisement,
           sessionDescription,
-          vehicleVin,currentVehicleDescription} = req.body;
-        const userId = await User.findById(req.user._id);
-        const expert = await Expert.findById(req.body.id);
-        // Check if the user exists
-        const user = await User.findById(userId);
-        const experts = await Expert.findById(expert);
-
-        if (!experts) {
-          return res.status(404).json({ success: false, message: 'expert not found' });
+          vehicleVin,
+          currentVehicleDescription,
+          expertScheduleId
+        } = req.body;
+    
+        // Check if location is provided and contains latitude and longitude properties
+        if (!location || !location.latitude || !location.longitude) {
+          return res.status(400).json({
+            success: false,
+            message: 'Location coordinates are required and must include latitude and longitude properties.',
+          });
         }
+    
+        const latitude = parseFloat(location.latitude);
+        const longitude = parseFloat(location.longitude);
+    
+        if (isNaN(latitude) || isNaN(longitude)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid coordinates',
+          });
+        }
+    
+        const userId = req.user._id;
+        const expertId = req.body.id;
+    
+        const user = await User.findById(userId);
+        const expert = await Expert.findById(expertId);
     
         if (!user) {
-          return res.status(404).json({ success: false, message: 'User not found' });
+          return res.status(404).json({
+            success: false,
+            message: 'User not found'
+          });
         }
     
-        // Create a new BookingSession instance
+        if (!expert) {
+          return res.status(404).json({
+            success: false,
+            message: 'Expert not found'
+          });
+        }
+    
         const newBookingSession = new BookingSession({
-          fullname, email,ownership
-          ,durationofownership,notableFeatures,
-          purpose,additionalDetails,
-          question1,question2,date,
-          time,location,year,model,make,
-          linkToAdvertisement, 
+          fullname,
+          email,
+          ownership,
+          durationofownership,
+          notableFeatures,
+          purpose,
+          additionalDetails,
+          question1,
+          question2,
+          date,
+          time,
+          location: {
+            type: 'Point',
+            coordinates: [longitude, latitude],
+          },
+          year,
+          model,
+          make,
+          linkToAdvertisement,
           sessionDescription,
-          vehicleVin,currentVehicleDescription,
-          expert: expert._id,
+          vehicleVin,
+          currentVehicleDescription,
+          expertId: expert._id,
+          userId: user._id
         });
     
-        // Save the new booking session to the database
         await newBookingSession.save();
     
-        // Add the booking session to the user's bookingsession array
         user.bookingsession.push({
           booking: newBookingSession,
-          poster: 'your-poster-value', // Replace with actual poster value
-        });
-        experts.bookingsession.push({
-          booking: newBookingSession,
-          poster: 'your-poster-value', // Replace with actual poster value
+          poster: 'your-poster-value'
         });
     
-        // Save the user with the updated bookingsession array
+        expert.bookingsession.push({
+          booking: newBookingSession,
+          poster: 'your-poster-value'
+        });
+    
         await user.save();
-        await experts.save();
+        await expert.save();
+    
+        // Update reserved field in expert model's expertSchedule
+        const expertScheduleIndex = expert.expertSchedule.findIndex(schedule => schedule._id.toString() === expertScheduleId.toString());
+        if (expertScheduleIndex !== -1) {
+          expert.expertSchedule[expertScheduleIndex].reserved = true;
+          await expert.save();
+        }
     
         res.status(201).json({
           success: true,
           message: 'Booking session added successfully',
-          bookingSession: newBookingSession,
+          bookingSession: newBookingSession
         });
       } catch (error) {
         console.error('Error adding booking session:', error);
-        res.status(500).json({ success: false, message: 'Something went wrong' });
+        res.status(500).json({
+          success: false,
+          message: 'Something went wrong'
+        });
       }
-    }
- 
+    };
+      
     export const getBookingSession = async (req, res) => {
       try {
         const userId = req.params.id;
@@ -595,6 +657,30 @@ export const onlineInspectionReport = async (req, res) => {
     if (!expert) {
         return res.status(404).json({ success: false, message: 'Expert not found' });
     }
+
+
+const location = req.body.location;
+
+    if (!location || !location.latitude || !location.longitude) {
+      return res.status(400).json({
+        success: false,
+        message: 'Location coordinates are required and must include latitude and longitude properties.',
+      });
+    }
+
+    const latitude = parseFloat(location.latitude);
+    const longitude = parseFloat(location.longitude);
+
+    if (isNaN(latitude) || isNaN(longitude)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid coordinates',
+      });
+    }
+
+
+
+
     const OnlineInspection = await onlineInspection.create({
       make: req.body.make,
       model: req.body.model,
@@ -617,9 +703,15 @@ export const onlineInspectionReport = async (req, res) => {
       carImages: req.body.carImages,
       RegistrationImages: req.body.RegistrationImages,
       Documents: req.body.Documents,
+      location: {
+        type: 'Point',
+        coordinates: [longitude, latitude],
+      },
       expertId :expert,
       userId : user 
     });
+
+    const expertScheduleId = req.body.expertScheduleId;
 
     await OnlineInspection.save();
   
@@ -647,6 +739,10 @@ export const onlineInspectionReport = async (req, res) => {
       carImages: req.body.carImages,
       RegistrationImages: req.body.RegistrationImages,
       Documents: req.body.Documents,
+      location: {
+        type: 'Point',
+        coordinates: [longitude, latitude],
+      },
       user: user,
     });
     await expert.save();
@@ -671,9 +767,18 @@ export const onlineInspectionReport = async (req, res) => {
       carImages: req.body.carImages,
       RegistrationImages: req.body.RegistrationImages,
       Documents: req.body.Documents,
+      location: {
+        type: 'Point',
+        coordinates: [longitude, latitude],
+      },
       expert: expert,
     });
     await user.save();
+    const expertScheduleIndex = expert.expertSchedule.findIndex(schedule => schedule._id.toString() === expertScheduleId.toString());
+    if (expertScheduleIndex !== -1) {
+      expert.expertSchedule[expertScheduleIndex].reserved = true;
+      await expert.save();
+    }
 
     res.status(201).json({ 
       success: true,
@@ -699,6 +804,8 @@ export const onsiteInspectionReport = async (req, res) => {
     if (!expert) {
         return res.status(404).json({ success: false, message: 'Expert not found' });
     }
+
+    const expertScheduleId = req.body.expertScheduleId;
 
     const OnsiteInspection = await onsiteInspection.create({
       make: req.body.make,
@@ -780,6 +887,11 @@ export const onsiteInspectionReport = async (req, res) => {
       expert: expert,
   });
     await user.save();
+    const expertScheduleIndex = expert.expertSchedule.findIndex(schedule => schedule._id.toString() === expertScheduleId.toString());
+    if (expertScheduleIndex !== -1) {
+      expert.expertSchedule[expertScheduleIndex].reserved = true;
+      await expert.save();
+    }
 
     res.status(201).json({ 
       success: true, 
