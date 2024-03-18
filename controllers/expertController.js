@@ -14,6 +14,7 @@ export const createExpert = async (req, res) => {
         city,
         country,
         feesPerConsaltation,
+        skills,
         specialization,
         timing
       } = req.body;
@@ -39,7 +40,8 @@ export const createExpert = async (req, res) => {
           timing,
           city,
           country,
-          feesPerConsaltation
+          feesPerConsaltation,
+          skills
           
         });
   
@@ -59,19 +61,20 @@ export const createExpert = async (req, res) => {
 
   export const getExperts = async (req, res) => {
     try {
-      const experts = await Expert.find();
-      res.status(200).json({
-        success: true,
-        message: "Experts fetched successfully", 
-        data:  experts
-      });
+        const experts = await Expert.find({ 'expertSchedule.reserved': false });
+        res.status(200).json({
+            success: true,
+            message: "Experts with reserved status as false fetched successfully",
+            data: experts
+        });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: error.message,
-      });
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
     }
-  }
+}
+
 
 
   export const deleteExperts = async (req, res) => {

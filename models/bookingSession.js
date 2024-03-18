@@ -29,6 +29,7 @@ const bookingSessionSchema = new mongoose.Schema({
       type: String,
       default: "No",
     },
+    
     date: {
       type: Date,
     },

@@ -39,6 +39,9 @@ const expertSchema = new mongoose.Schema(
     feesPerConsaltation: {
       type: String,
     },
+    skills:{
+      type: String,
+    },
     pocketGarrage: [
       {
         name: "String",

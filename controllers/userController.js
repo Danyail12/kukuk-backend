@@ -408,129 +408,101 @@ export const deleteUser = async (req, res) => {
 
     export const addBookingSession = async (req, res) => {
       try {
-        const {
-          fullname,
-          email,
-          ownership,
-          durationofownership,
-          notableFeatures,
-          purpose,
-          additionalDetails,
-          question1,
-          question2,
-          date,
-          time,
-          location,
-          year,
-          model,
-          make,
-          linkToAdvertisement,
-          sessionDescription,
-          vehicleVin,
-          currentVehicleDescription,
-          expertScheduleId
-        } = req.body;
-    
-        // Check if location is provided and contains latitude and longitude properties
-        if (!location || !location.latitude || !location.longitude) {
-          return res.status(400).json({
-            success: false,
-            message: 'Location coordinates are required and must include latitude and longitude properties.',
+          const {
+              fullname,
+              email,
+              ownership,
+              durationofownership,
+              notableFeatures,
+              purpose,
+              additionalDetails,
+              question1,
+              question2,
+              date,
+              time,
+              year,
+              model,
+              make,
+              linkToAdvertisement,
+              sessionDescription,
+              vehicleVin,
+              currentVehicleDescription,
+              expertScheduleId
+          } = req.body;
+  
+          // Check if user is authenticated and retrieve userId
+          const userId = req.user._id;
+          if (!userId) {
+              return res.status(401).json({ success: false, message: 'Unauthorized' });
+          }
+  
+          // Retrieve expertId from the request body
+          const expertId = req.body.expertId;
+  
+          // Find user and expert
+          const user = await User.findById(userId);
+          const expert = await Expert.findById(expertId);
+  
+          // Check if user and expert exist
+          if (!user) {
+              return res.status(404).json({ success: false, message: 'User not found' });
+          }
+          if (!expert) {
+              return res.status(404).json({ success: false, message: 'Expert not found' });
+          }
+  
+          // Create new booking session
+          const newBookingSession = new BookingSession({
+              fullname,
+              email,
+              ownership,
+              durationofownership,
+              notableFeatures,
+              purpose,
+              additionalDetails,
+              question1,
+              question2,
+              date,
+              time,
+              year,
+              model,
+              make,
+              linkToAdvertisement,
+              sessionDescription,
+              vehicleVin,
+              currentVehicleDescription,
+              expertId: expert._id,
+              userId: user._id
           });
-        }
-    
-        const latitude = parseFloat(location.latitude);
-        const longitude = parseFloat(location.longitude);
-    
-        if (isNaN(latitude) || isNaN(longitude)) {
-          return res.status(400).json({
-            success: false,
-            message: 'Invalid coordinates',
-          });
-        }
-    
-        const userId = req.user._id;
-        const expertId = req.body.id;
-    
-        const user = await User.findById(userId);
-        const expert = await Expert.findById(expertId);
-    
-        if (!user) {
-          return res.status(404).json({
-            success: false,
-            message: 'User not found'
-          });
-        }
-    
-        if (!expert) {
-          return res.status(404).json({
-            success: false,
-            message: 'Expert not found'
-          });
-        }
-    
-        const newBookingSession = new BookingSession({
-          fullname,
-          email,
-          ownership,
-          durationofownership,
-          notableFeatures,
-          purpose,
-          additionalDetails,
-          question1,
-          question2,
-          date,
-          time,
-          location: {
-            type: 'Point',
-            coordinates: [longitude, latitude],
-          },
-          year,
-          model,
-          make,
-          linkToAdvertisement,
-          sessionDescription,
-          vehicleVin,
-          currentVehicleDescription,
-          expertId: expert._id,
-          userId: user._id
-        });
-    
-        await newBookingSession.save();
-    
-        user.bookingsession.push({
-          booking: newBookingSession,
-          poster: 'your-poster-value'
-        });
-    
-        expert.bookingsession.push({
-          booking: newBookingSession,
-          poster: 'your-poster-value'
-        });
-    
-        await user.save();
-        await expert.save();
-    
-        // Update reserved field in expert model's expertSchedule
-        const expertScheduleIndex = expert.expertSchedule.findIndex(schedule => schedule._id.toString() === expertScheduleId.toString());
-        if (expertScheduleIndex !== -1) {
-          expert.expertSchedule[expertScheduleIndex].reserved = true;
+  
+          // Save booking session
+          await newBookingSession.save();
+  
+          // Update user and expert with booking session
+          user.bookingsession.push({ booking: newBookingSession });
+          expert.bookingsession.push({ booking: newBookingSession });
+  
+          await user.save();
           await expert.save();
-        }
-    
-        res.status(201).json({
-          success: true,
-          message: 'Booking session added successfully',
-          bookingSession: newBookingSession
-        });
+  
+          // Update reserved field in expert model's expertSchedule
+          const expertScheduleIndex = expert.expertSchedule.findIndex(schedule => schedule._id.toString() === expertScheduleId.toString());
+          if (expertScheduleIndex !== -1) {
+              expert.expertSchedule[expertScheduleIndex].reserved = true;
+              await expert.save();
+          }
+  
+          res.status(201).json({
+              success: true,
+              message: 'Booking session added successfully',
+              bookingSession: newBookingSession
+          });
       } catch (error) {
-        console.error('Error adding booking session:', error);
-        res.status(500).json({
-          success: false,
-          message: 'Something went wrong'
-        });
+          console.error('Error adding booking session:', error);
+          res.status(500).json({ success: false, message: 'Something went wrong' });
       }
-    };
+  };
+  
       
     export const getBookingSession = async (req, res) => {
       try {
