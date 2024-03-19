@@ -14,6 +14,7 @@ import {
   deleteExpertSchedule,
   blockExpert,
   unblockExpert,
+  availableBookings
 } from "../controllers/expertController.js";
 import { AuthorizedAdmin, isAuthenticated, AuthotrizedExpert } from "../middlewares/auth.js";
 
@@ -34,6 +35,7 @@ router.route("/expert/getSchedule").get(isAuthenticated,AuthotrizedExpert, getEx
 router.route("/expert/deleteSchedule/:id").delete(isAuthenticated,AuthotrizedExpert, deleteExpertSchedule)
 router.route("/expert/active/:id").put( blockExpert)
 router.route("/expert/Unactived/:id").put( unblockExpert)
+router.route("/expert/availableBookings").post(isAuthenticated,availableBookings)
 
 
 

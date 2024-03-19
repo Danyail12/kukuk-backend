@@ -74,8 +74,34 @@ export const createExpert = async (req, res) => {
         });
     }
 }
+export const availableBookings = async (req, res) => {
+  try {
+      // Extract time and date from the request body
+      const { timing, date } = req.body;
 
+      // Convert timing to start and end time
+      const [startTime, endTime] = timing.split(' - ');
 
+      // Parse date string to Date object
+      const isoDate = new Date(date);
+
+      // Query the database for available slots matching the given time and date
+      const availableExperts = await Expert.find({
+          'expertSchedule.date': isoDate,
+          'expertSchedule.timing.start': startTime,
+          'expertSchedule.timing.end': endTime,
+          'expertSchedule.reserved': false
+      }, {
+          'expertSchedule.$': 1
+      });
+
+      // Return the available slots in the response
+      res.status(200).json({ success: true, availableExperts });
+  } catch (error) {
+      console.error('Error fetching available slots:', error);
+      res.status(500).json({ success: false, message: 'Something went wrong' });
+  }
+}
 
   export const deleteExperts = async (req, res) => {
     try {

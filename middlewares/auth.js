@@ -49,10 +49,20 @@ export const AuthorizedAdmin = (req, res, next) => {
 
 
 export const AuthorizedSubscriber = (req, res, next) => {
-  if(req.user.subscriber.status!=='active'&&req.user.role!=='admin'){
+  if(req.user.subscription!=='active'&&req.user.role!=='admin'){
     res.status(401).json({ success: false, message: "only Subscribers are allowed" });
   }else{
     next();
   }
 
+}
+
+
+export const AuthorizedSubscriberEbook = (req, res, next) => {
+  if(req.user.subscriptionEbook!=='active'){
+    res.status(401).json({ success: false, message: "only Subscribers are allowed" });
+  }else{
+    next();
+  }
+  
 }

@@ -144,6 +144,10 @@ const userSchema = new mongoose.Schema({
     id: String,
     status: String
   },
+  subscriptionEbook:{
+    id: String,
+    status: String
+  },
   playlist: [
     {
       course: {

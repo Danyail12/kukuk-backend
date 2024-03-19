@@ -22,9 +22,9 @@ const expertScheduleSchema = new mongoose.Schema({
         type: Date,
         // required: true
     },
-    time:{
-        type: String,
-        // required: true
+   timing: {
+      start: String, // Or you can store times as strings if you prefer
+      end: String,   // Or you can use Date objects for timings as well
     },
     city:{
         type: String,

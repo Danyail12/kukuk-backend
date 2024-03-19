@@ -159,10 +159,13 @@ const expertSchema = new mongoose.Schema(
         email: "String",
         description: "String",
         specailization:"String",
-        date:"String",
+        date:"Date",
         city: "String",
         country:"String",
-        timing:"String",
+        timing: {
+          start: String, // Or you can store times as strings if you prefer
+          end: String,   // Or you can use Date objects for timings as well
+        },
         reserved: {
           type: Boolean,
           default: false
