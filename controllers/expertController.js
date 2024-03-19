@@ -61,10 +61,10 @@ export const createExpert = async (req, res) => {
 
   export const getExperts = async (req, res) => {
     try {
-        const experts = await Expert.find({ 'expertSchedule.reserved': false });
+        const experts = await Expert.find();
         res.status(200).json({
             success: true,
-            message: "Experts with reserved status as false fetched successfully",
+            message: "Experts fetched successfully",
             data: experts
         });
     } catch (error) {

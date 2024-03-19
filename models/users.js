@@ -174,6 +174,10 @@ bookingsession:[
     booking: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "BookingSession",
+
+    },
+    expert:{
+      type:Object,
     },
     poster: String,
   }

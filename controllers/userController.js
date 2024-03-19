@@ -438,22 +438,27 @@ export const deleteUser = async (req, res) => {
   
           // Retrieve expertId from the request body
           const expertId = req.body.expertId;
-  
+          
           // Find user and expert
           const user = await User.findById(userId);
           const expert = await Expert.findById(expertId);
   
           // Check if user and expert exist
           if (!user) {
-              return res.status(404).json({ success: false, message: 'User not found' });
+            return res.status(404).json({ success: false, message: 'User not found' });
           }
           if (!expert) {
-              return res.status(404).json({ success: false, message: 'Expert not found' });
+            return res.status(404).json({ success: false, message: 'Expert not found' });
           }
-  
+          const expertScheduleIndex = expert.expertSchedule.findIndex(schedule => schedule._id.toString() === expertScheduleId.toString());
+          if (expertScheduleIndex !== -1) {
+            expert.expertSchedule[expertScheduleIndex].reserved = true;
+            await expert.save();
+          }
+          
           // Create new booking session
           const newBookingSession = new BookingSession({
-              fullname,
+            fullname,
               email,
               ownership,
               durationofownership,
@@ -471,59 +476,70 @@ export const deleteUser = async (req, res) => {
               sessionDescription,
               vehicleVin,
               currentVehicleDescription,
-              expertId: expert._id,
+              expertSchedule:expert.expertSchedule[expertScheduleIndex],
               userId: user._id
           });
   
-          // Save booking session
           await newBookingSession.save();
-  
+          // Save booking session
+          
           // Update user and expert with booking session
-          user.bookingsession.push({ booking: newBookingSession });
-          expert.bookingsession.push({ booking: newBookingSession });
+          user.bookingsession.push({ 
+              booking: newBookingSession,
+              // expert: expert.expertSchedule[expertScheduleIndex],
+              
+          });
+  
+          expert.bookingsession.push({ 
+              booking: newBookingSession,
+              // expert: expert.expertSchedule[expertScheduleIndex],
+              user: user
+          });
   
           await user.save();
           await expert.save();
   
           // Update reserved field in expert model's expertSchedule
-          const expertScheduleIndex = expert.expertSchedule.findIndex(schedule => schedule._id.toString() === expertScheduleId.toString());
-          if (expertScheduleIndex !== -1) {
-              expert.expertSchedule[expertScheduleIndex].reserved = true;
-              await expert.save();
-          }
   
           res.status(201).json({
               success: true,
               message: 'Booking session added successfully',
-              bookingSession: newBookingSession
-          });
+              bookingSession: newBookingSession,
+              // expert: expert.expertSchedule[expertScheduleIndex]
+          }); 
       } catch (error) {
           console.error('Error adding booking session:', error);
           res.status(500).json({ success: false, message: 'Something went wrong' });
       }
   };
   
+  
       
-    export const getBookingSession = async (req, res) => {
-      try {
+  export const getBookingSession = async (req, res) => {
+    try {
         const userId = req.params.id;
-    
-        // Check if the user exists and populate the bookingsession array
+
+        // Check if the user exists and populate the bookingsession array with booking data
         const user = await User.findById(userId).populate('bookingsession.booking');
-    
+
         if (!user) {
-          return res.status(404).json({ success: false, message: 'User not found' });
+            return res.status(404).json({ success: false, message: 'User not found' });
         }
-    
+
+        // Filter out any bookingsessions where the expertId is null (no associated expert schedule)
+        const filteredBookingSessions = user.bookingsession.filter(session => session.booking.expertId !== null);
+ 
         res.status(200).json({
-          success: true,
-          bookingSessions: user.bookingsession,
+            success: true,
+            bookingSessions: filteredBookingSessions,
         });
-      } catch (error) {
+    } catch (error) {
         console.error('Error fetching user booking sessions:', error);
         res.status(500).json({ success: false, message: 'Something went wrong' });
-      }
-    };
+    }
+};
+
+
     export const getAllExperts = async (req, res) => {
 
       try {

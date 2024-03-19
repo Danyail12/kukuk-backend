@@ -68,7 +68,15 @@ const bookingSessionSchema = new mongoose.Schema({
     linkToAdvertisement: {
       type: String,
     },
-} 
+    expertId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Expert',
+      // required: true
+  },
+  expertSchedule:{
+    type:Object
+  } 
+},
 
 )
 
