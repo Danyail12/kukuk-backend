@@ -150,6 +150,9 @@ const expertSchema = new mongoose.Schema(
           ref: 'BookingSession',
         },
         poster: String,
+        user:{
+          type:Object,
+        }
       },
     ],
     

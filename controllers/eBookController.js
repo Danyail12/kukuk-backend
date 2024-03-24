@@ -18,7 +18,7 @@ export const getEBooks = async (req, res) => {
 
 
 export const createEbooks = async (req, res) => {
-    const { name, description, category, createby ,price} = req.body;
+    const { name, description, category, createby ,price,stars,author} = req.body;
     
     // if(!name || !description || !category || !createby) {
     //     return res.status(400).json({ message: "All fields are required." });
@@ -30,6 +30,8 @@ export const createEbooks = async (req, res) => {
        description,
        category,
        createby,
+       stars,
+       author,
        price,
        poster:{
         public_id:"temp",

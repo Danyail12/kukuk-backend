@@ -18,7 +18,6 @@ import {
   addBookingSession,
   getBookingSession,
   getAllExperts,
-  RescheduleBooking,
   deleteBooking,
   onsiteInspectionReport,
   onlineInspectionReport,
@@ -28,7 +27,7 @@ import {
   deleteOnsiteInspection,
   updateOnsiteInspection,
   updateOnlineInspection,
-  getallBookingSession
+  getallBookingSession,
 } from "../controllers/userController.js";
 import { AuthorizedAdmin, isAuthenticated } from "../middlewares/auth.js";
 
@@ -54,7 +53,7 @@ router.route("/admin/users").get(getallusers);
 router.route("/admin/user/:id").put(updateUserRole).delete(deleteUser);
 router.route("/addBookingSession").post(isAuthenticated, addBookingSession)
 router.route("/bookingSession/:id").delete(isAuthenticated ,deleteBooking)
-router.route("/RescheduleBooking/:id").put(isAuthenticated,RescheduleBooking);
+// router.route("/RescheduleBooking/:id").put(isAuthenticated,RescheduleBooking);
 router.route("/getBookingSession/:id").get(getBookingSession);
 router.route("/getAllExperts").get(getAllExperts);
 router.route("/onsiteInspectionReport").post(isAuthenticated,onsiteInspectionReport);
@@ -66,5 +65,6 @@ router.route("/deleteOnsiteInspection/:id").delete(isAuthenticated,deleteOnsiteI
 router.route("/updateOnsiteInspection/:id").put(isAuthenticated, updateOnsiteInspection);
 router.route("/updateOnlineInspection/:id").put(isAuthenticated, updateOnlineInspection);
 router.route("/getallBookingSession").get(getallBookingSession);
+
 
 export default router;

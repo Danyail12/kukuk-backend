@@ -30,7 +30,7 @@ export const getCourse = async (req, res) => {
 
 export const createCourse = async (req, res) => {
     
-    const { name, description, category, createby,price } = req.body;
+    const { name, description, category, createby,price,duration,stars } = req.body;
     
     // if(!name || !description || !category || !createby || !price) {
     //     return res.status(400).json({ message: "All fields are required." });
@@ -42,6 +42,8 @@ export const createCourse = async (req, res) => {
        name,
        description,
        category,
+       duration,
+       stars,
        price,
        createby,
        poster:{

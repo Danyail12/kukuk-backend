@@ -3,6 +3,9 @@ import { sendToken } from "../utils/sendToken.js";
 import { expertSendToken } from "../utils/expertSendToken.js";
 import expertSchedule from "../models/expertSchedule.js";
 import Expert from "../models/expert.js";
+import BookingSession from "../models/bookingSession.js";
+import { User } from "../models/users.js";
+import ExpertSchedule from "../models/expertSchedule.js";
 
 export const createExpert = async (req, res) => {
     try {
@@ -102,6 +105,75 @@ export const availableBookings = async (req, res) => {
       res.status(500).json({ success: false, message: 'Something went wrong' });
   }
 }
+export const rescheduleBooking = async (req, res) => {
+  try {
+    const { newExpertId, expertScheduleId } = req.body;
+
+    // Find the booking session to reschedule
+    const bookingSession = await BookingSession.findById(req.params.id);
+    if (!bookingSession) {
+      return res.status(404).json({ error: 'Booking session not found' });
+    }
+    console.log(bookingSession);
+    // Find the previous expert schedule
+    const previousExpertScheduleId = bookingSession.expertSchedule._id;
+
+    // Remove the booking session from the previous expert's bookingsession array
+    const previousExpert = await Expert.findOneAndUpdate(
+      { "bookingsession.booking": req.params.id },
+      { $pull: { bookingsession: { booking: req.params.id } } },
+      { new: true }
+    );
+    console.log('Previous expert:', previousExpert);
+     if (!previousExpert) {
+      return res.status(404).json({ error: 'Previous expert not found' });
+    }
+
+   // Update reserved field in previous expert's expertSchedule
+const previousExpertSchedule = previousExpert.expertSchedule.find(schedule => schedule._id.toString() === previousExpertScheduleId.toString());
+if (!previousExpertSchedule) {
+  return res.status(404).json({ error: 'Previous expert schedule not found' });
+}
+previousExpertSchedule.reserved = false;
+await previousExpert.save();
+
+// Find the new expert
+const newExpert = await Expert.findById(newExpertId);
+if (!newExpert) {
+  return res.status(404).json({ error: 'New expert not found' });
+}
+
+// Find the expert schedule in the new expert's array
+const newExpertSchedule = newExpert.expertSchedule.find(schedule => schedule._id.toString() === expertScheduleId.toString());
+if (!newExpertSchedule) {
+  return res.status(404).json({ error: 'Expert schedule not found' });
+}
+newExpertSchedule.reserved = true;
+await newExpert.save();
+ const user = await User.findById(req.user._id);
+
+    // Update expertSchedule of the booking session
+    bookingSession.expertSchedule = { _id: expertScheduleId, reserved: true };
+
+    // Add the booking session to the new expert's bookingsession array
+    newExpert.bookingsession.push({ booking: bookingSession, user: user });
+    await newExpert.save();
+
+    // Update the booking session in the user's booking session array
+    const userBookingIndex = user.bookingsession.findIndex(session => session.booking.toString() === req.params.id);
+    if (userBookingIndex !== -1) {
+      user.bookingsession[userBookingIndex].booking = bookingSession;
+      await user.save();
+    }
+
+    // Return success response
+    res.status(200).json({ message: 'Booking session rescheduled successfully' });
+  } catch (error) {
+    console.error('Error rescheduling booking session:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 
   export const deleteExperts = async (req, res) => {
     try {
@@ -396,17 +468,37 @@ export const logout = async (req, res) => {
 
 export const getExpertBookingSessions = async (req, res) => {
   try {
-    const expert = await Expert.findById(req.user._id).populate('bookingsession');
+    const expert = await Expert.findById(req.user._id).populate({
+      path: 'bookingsession',
+      populate: {
+        path: 'booking',
+        populate: {
+          path: 'user', // Populate the user field within the booking object
+          select: 'fullName email', // Select the fields you want to include for the user
+        },
+      },
+    });
 
     if (!expert) {
       return res.status(404).json({ success: false, message: "Expert not found" });
     }
 
-    res.status(200).json({ success: true, bookings: expert.bookingsession });
+    const bookingSessionsWithUsers = expert.bookingsession.map(session => ({
+      _id: session._id,
+      booking: session.booking,
+      user: session.booking.user, // Include user details here
+    }));
+
+    res.status(200).json({ success: true, bookingSessions: bookingSessionsWithUsers });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 }
+
+
+
+
+
 
 
 

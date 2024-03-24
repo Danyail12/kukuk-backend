@@ -571,11 +571,29 @@ export const deleteUser = async (req, res) => {
           return res.status(404).json({ error: 'User not found' });
         }
     
-        await user.updateOne({ $pull: { bookingsession: bookingId } });
-
+        // Find the expert associated with the booking
+        const expert = await Expert.findOne({ "bookingsession.booking": bookingId });
+        if (!expert) {
+          return res.status(404).json({ error: 'Expert not found' });
+        }
+    
+        // Update reserved field in expert's schedule
+        const expertScheduleId = booking.expertSchedule._id;
+        const expertSchedule = expert.expertSchedule.find(schedule => schedule._id.toString() === expertScheduleId.toString());
+        if (expertSchedule) {
+          expertSchedule.reserved = false;
+          await expert.save();
+        }
+    
+        // Remove the booking session from user's bookingsession array
+        await user.updateOne({ $pull: { bookingsession: { booking: bookingId } } });
+    
+        // Remove the booking session from expert's bookingsession array
+        await expert.updateOne({ $pull: { bookingsession: { booking: bookingId } } });
+    
         // Remove the booking document
         await BookingSession.findByIdAndDelete(bookingId);
-        
+    
         res.status(200).json({ message: 'Booking deleted successfully' });
     
       } catch (error) {
@@ -583,7 +601,7 @@ export const deleteUser = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
       }
     };
-
+    
     export const RescheduleBooking = async (req, res) => {
       try {
         const bookingId = req.params.id;

@@ -15,6 +15,12 @@ const eBookSchema = new mongoose.Schema({
         type: Number,
         // required: true
     },
+    stars:{
+        type: String,
+    },
+    author:{
+        type: String,
+    },
    
     poster:{
         public_id: {
