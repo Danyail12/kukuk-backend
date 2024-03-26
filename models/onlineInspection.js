@@ -117,8 +117,13 @@ const onlineInspectionSchema = new mongoose.Schema({
           default: [0, 0],
   
         },
-      },
-    
+        expertId:{
+            type:Object
+        },
+        user:{
+            type:Object
+        }
+      }
 })
 
 

@@ -105,61 +105,128 @@ export const availableBookings = async (req, res) => {
       res.status(500).json({ success: false, message: 'Something went wrong' });
   }
 }
-export const rescheduleBooking = async (req, res) => {
+// export const rescheduleBooking = async (req, res) => {
+//   try {
+//     const { newExpertId, expertScheduleId } = req.body;
+
+//     // Find the booking session to reschedule
+//     const bookingSession = await BookingSession.findById(req.params.id);
+//     if (!bookingSession) {
+//       return res.status(404).json({ error: 'Booking session not found' });
+//     }
+//     console.log(bookingSession);
+//     // Find the previous expert schedule
+//     const previousExpertScheduleId = bookingSession.expertSchedule._id;
+
+//     // Remove the booking session from the previous expert's bookingsession array
+//     const previousExpert = await Expert.findOneAndUpdate(
+//       { "bookingsession.booking": req.params.id },
+//       { $pull: { bookingsession: { booking: req.params.id } } },
+//       { new: true }
+//     );
+//     console.log('Previous expert:', previousExpert);
+//      if (!previousExpert) {
+//       return res.status(404).json({ error: 'Previous expert not found' });
+//     }
+
+//    // Update reserved field in previous expert's expertSchedule
+// const previousExpertSchedule = previousExpert.expertSchedule.find(schedule => schedule._id.toString() === previousExpertScheduleId.toString());
+// if (!previousExpertSchedule) {
+//   return res.status(404).json({ error: 'Previous expert schedule not found' });
+// }
+// previousExpertSchedule.reserved = false;
+// await previousExpert.save();
+
+// // Find the new expert
+// const newExpert = await Expert.findById(newExpertId);
+// if (!newExpert) {
+//   return res.status(404).json({ error: 'New expert not found' });
+// }
+
+// // Find the expert schedule in the new expert's array
+// const newExpertSchedule = newExpert.expertSchedule.find(schedule => schedule._id.toString() === expertScheduleId.toString());
+// if (!newExpertSchedule) {
+//   return res.status(404).json({ error: 'Expert schedule not found' });
+// }
+// newExpertSchedule.reserved = true;
+// await newExpert.save();
+//  const user = await User.findById(req.user._id);
+
+//     // Update expertSchedule of the booking session
+//     bookingSession.expertSchedule = { _id: expertScheduleId, reserved: true };
+
+//     // Add the booking session to the new expert's bookingsession array
+//     newExpert.bookingsession.push({ booking: bookingSession, user: user });
+//     await newExpert.save();
+
+//     // Update the booking session in the user's booking session array
+//     const userBookingIndex = user.bookingsession.findIndex(session => session.booking.toString() === req.params.id);
+//     if (userBookingIndex !== -1) {
+//       user.bookingsession[userBookingIndex].booking = bookingSession;
+//       await user.save();
+//     }
+
+//     // Return success response
+//     res.status(200).json({ message: 'Booking session rescheduled successfully' });
+//   } catch (error) {
+//     console.error('Error rescheduling booking session:', error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
+
+export const RescheduleBooking = async (req, res) => {
   try {
-    const { newExpertId, expertScheduleId } = req.body;
+    const { expertScheduleId } = req.body;
 
     // Find the booking session to reschedule
     const bookingSession = await BookingSession.findById(req.params.id);
     if (!bookingSession) {
       return res.status(404).json({ error: 'Booking session not found' });
     }
-    console.log(bookingSession);
-    // Find the previous expert schedule
     const previousExpertScheduleId = bookingSession.expertSchedule._id;
-
-    // Remove the booking session from the previous expert's bookingsession array
+    console.log(previousExpertScheduleId);
+    // Find the previous expert and update their expert schedule
     const previousExpert = await Expert.findOneAndUpdate(
       { "bookingsession.booking": req.params.id },
       { $pull: { bookingsession: { booking: req.params.id } } },
       { new: true }
     );
     console.log('Previous expert:', previousExpert);
-     if (!previousExpert) {
+    if (!previousExpert) {
       return res.status(404).json({ error: 'Previous expert not found' });
     }
 
-   // Update reserved field in previous expert's expertSchedule
-const previousExpertSchedule = previousExpert.expertSchedule.find(schedule => schedule._id.toString() === previousExpertScheduleId.toString());
-if (!previousExpertSchedule) {
-  return res.status(404).json({ error: 'Previous expert schedule not found' });
-}
-previousExpertSchedule.reserved = false;
-await previousExpert.save();
+    // Update reserved field in previous expert's expertSchedule
+    const previousExpertScheduleIndex = previousExpert.expertSchedule.findIndex(schedule => schedule._id.toString() === bookingSession.expertSchedule._id.toString());
+    if (previousExpertScheduleIndex !== -1) {
+      previousExpert.expertSchedule[previousExpertScheduleIndex].reserved = false;
+      await previousExpert.save();
+    }
 
-// Find the new expert
-const newExpert = await Expert.findById(newExpertId);
-if (!newExpert) {
-  return res.status(404).json({ error: 'New expert not found' });
-}
+    // Find and update the new expert's expert schedule
+    const newExpert = await Expert.findOne({ "expertSchedule._id": expertScheduleId });
+    if (!newExpert) {
+      return res.status(404).json({ error: 'New expert not found' });
+    }
 
-// Find the expert schedule in the new expert's array
-const newExpertSchedule = newExpert.expertSchedule.find(schedule => schedule._id.toString() === expertScheduleId.toString());
-if (!newExpertSchedule) {
-  return res.status(404).json({ error: 'Expert schedule not found' });
-}
-newExpertSchedule.reserved = true;
-await newExpert.save();
- const user = await User.findById(req.user._id);
+    const newExpertScheduleIndex = newExpert.expertSchedule.findIndex(schedule => schedule._id.toString() === expertScheduleId.toString());
+    if (newExpertScheduleIndex !== -1) {
+      newExpert.expertSchedule[newExpertScheduleIndex].reserved = true;
+      await newExpert.save();
+    }
 
-    // Update expertSchedule of the booking session
-    bookingSession.expertSchedule = { _id: expertScheduleId, reserved: true };
-
+    const user = await User.findById(req.user._id);
     // Add the booking session to the new expert's bookingsession array
     newExpert.bookingsession.push({ booking: bookingSession, user: user });
     await newExpert.save();
 
-    // Update the booking session in the user's booking session array
+    // Update expertSchedule of the booking session
+    bookingSession.expertSchedule = newExpert.expertSchedule[newExpertScheduleIndex];
+
+    // Save changes made to the booking session
+    await bookingSession.save();
+
+    // Update user's bookingsession array
     const userBookingIndex = user.bookingsession.findIndex(session => session.booking.toString() === req.params.id);
     if (userBookingIndex !== -1) {
       user.bookingsession[userBookingIndex].booking = bookingSession;
@@ -167,12 +234,13 @@ await newExpert.save();
     }
 
     // Return success response
-    res.status(200).json({ message: 'Booking session rescheduled successfully' });
+    res.status(200).json({ message: 'Booking session rescheduled successfully', bookingSession });
   } catch (error) {
     console.error('Error rescheduling booking session:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 
   export const deleteExperts = async (req, res) => {
@@ -244,93 +312,176 @@ await newExpert.save();
    
 
 
+  // export const nearestExperts = async (req, res) => {
+  //   try {
+  //     const { latitude, longitude } = req.body;
+  
+  //     // Ensure latitude and longitude are provided in the query parameters
+  //     if (!latitude || !longitude) {
+  //       return res.status(400).json({
+  //         success: false,
+  //         message: 'Latitude and longitude are required in the query parameters.',
+  //       });
+  //     }
+  
+  //     // Parse latitude and longitude to float
+  //     const lat = parseFloat(latitude);
+  //     const lon = parseFloat(longitude);
+  
+  //     // Ensure valid coordinates
+  //     if (isNaN(lat) || isNaN(lon)) {
+  //       return res.status(400).json({
+  //         success: false,
+  //         message: 'Invalid coordinates.',
+  //       });
+  //     }
+  
+  //     // Find the nearest experts based on the given location using $geoNear
+  //     const nearestExperts = await Expert.aggregate([
+  //       {
+  //         $geoNear: {
+  //           near: {
+  //             type: 'Point',
+  //             coordinates: [lon, lat],
+  //           },
+  //           key: 'expertSchedule.location',
+  //           distanceField: 'dist.calculated',
+  //           spherical: true,
+  //           query: { 'expertSchedule.reserved': false }, // Filter out experts with reserved schedules
+  //         },
+  //       },
+  //       {
+  //         $match: {
+  //           'expertSchedule.location': {
+  //             $geoWithin: {
+  //               $centerSphere: [
+  //                 [lon, lat], // Center coordinates
+  //                 10 / 6371, // 10 kilometers radius (convert to radians)
+  //               ],
+  //             },
+  //           },
+  //         },
+  //       },
+  //       {
+  //         $project: {
+  //           expertSchedule: {
+  //             $filter: {
+  //               input: '$expertSchedule',
+  //               as: 'schedule',
+  //               cond: {
+  //                 $eq: ['$$schedule.location.coordinates', [lon, lat]],
+  //               },
+  //             },
+  //           },
+  //         },
+  //       },
+  //     ]);
+  
+  //     if (!nearestExperts || nearestExperts.length === 0) {
+  //       return res.status(404).json({
+  //         success: false,
+  //         message: 'No nearest experts found.',
+  //       });
+  //     }
+
+  //     // const expertsWithDetails = await Promise.all(nearestExperts.map(async (expert) => {
+  //     //   const fullExpert = await Expert.findById(expert._id).populate('expertSchedule.location');
+  //     //   return fullExpert;
+  //     // }));
+  
+  //     res.status(200).json({
+  //       success: true,
+  //       message: 'Nearest expert with available schedule found.',
+  //       expert: nearestExperts,  // Return the first nearest expert
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({
+  //       success: false,
+  //       message: error.message,
+  //     });
+  //   }
+  // };
+  
   export const nearestExperts = async (req, res) => {
     try {
-      const { latitude, longitude } = req.body;
-  
-      // Ensure latitude and longitude are provided in the query parameters
-      if (!latitude || !longitude) {
-        return res.status(400).json({
-          success: false,
-          message: 'Latitude and longitude are required in the query parameters.',
-        });
-      }
-  
-      // Parse latitude and longitude to float
-      const lat = parseFloat(latitude);
-      const lon = parseFloat(longitude);
-  
-      // Ensure valid coordinates
-      if (isNaN(lat) || isNaN(lon)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid coordinates.',
-        });
-      }
-  
-      // Find the nearest experts based on the given location using $geoNear
-      const nearestExperts = await Expert.aggregate([
-        {
-          $geoNear: {
-            near: {
-              type: 'Point',
-              coordinates: [lon, lat],
-            },
-            key: 'expertSchedule.location',
-            distanceField: 'dist.calculated',
-            spherical: true,
-            query: { 'expertSchedule.reserved': false }, // Filter out experts with reserved schedules
-          },
-        },
-        {
-          $match: {
-            'expertSchedule.location': {
-              $geoWithin: {
-                $centerSphere: [
-                  [lon, lat], // Center coordinates
-                  10 / 6371, // 10 kilometers radius (convert to radians)
-                ],
-              },
-            },
-          },
-        },
-        {
-          $project: {
-            expertSchedule: {
-              $filter: {
-                input: '$expertSchedule',
-                as: 'schedule',
-                cond: {
-                  $eq: ['$$schedule.location.coordinates', [lon, lat]],
+        const { latitude, longitude } = req.body;
+
+        // Ensure latitude and longitude are provided in the request body
+        if (!latitude || !longitude) {
+            return res.status(400).json({
+                success: false,
+                message: 'Latitude and longitude are required in the request body.',
+            });
+        }
+
+        // Parse latitude and longitude to float
+        const lat = parseFloat(latitude);
+        const lon = parseFloat(longitude);
+
+        // Find the nearest experts based on the given location using $geoWithin
+        const nearestExperts = await Expert.aggregate([
+            {
+                $match: {
+                    'expertSchedule.location': {
+                        $geoWithin: {
+                            $centerSphere: [
+                                [lon, lat], // Center coordinates
+                                10 / 6371, // 10 kilometers radius (convert to radians)
+                            ],
+                        },
+                    },
+                    'expertSchedule.reserved': false,
                 },
-              },
             },
-          },
-        },
-      ]);
-  
-      if (!nearestExperts || nearestExperts.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: 'No nearest experts found.',
+            {
+                $lookup: {
+                    from: 'experts',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'expertDetails',
+                },
+            },
+            {
+                $unwind: '$expertDetails',
+            },
+        ]);
+
+        if (!nearestExperts || nearestExperts.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'No nearest experts found.',
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Nearest expert with available schedule found.',
+            expert: nearestExperts.map(expert => ({
+                _id: expert._id,
+                fullName: expert.expertDetails.fullName,
+                userName: expert.expertDetails.userName,
+                email: expert.expertDetails.email,
+                country: expert.expertDetails.country,
+                city: expert.expertDetails.city,
+                specialization: expert.expertDetails.specialization,
+                status: expert.expertDetails.status,
+                description: expert.expertDetails.description,
+                feesPerConsaltation: expert.expertDetails.feesPerConsaltation,
+                skills: expert.expertDetails.skills,
+                expertSchedule: expert.expertSchedule.filter(schedule => (
+                    schedule.location.coordinates[0] === lon && schedule.location.coordinates[1] === lat
+                )),
+            })),
         });
-      }
-  
-      res.status(200).json({
-        success: true,
-        message: 'Nearest expert with available schedule found.',
-        expert: nearestExperts, // Return the first nearest expert
-      });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: error.message,
-      });
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
     }
-  };
-  
-  
-  // expertController.js
+};
+
+
 export const getBookingSessionsForExpert = async (req, res) => {
   try {
     const expertId = req.params.id;
@@ -695,3 +846,14 @@ export const unblockExpert = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+export const NotReservedExpert = async (req, res) => {
+  try {
+    const expert = await Expert.find({ "expertSchedule.reserved": false });
+    res.status(200).json({ success: true, data: expert });
+  }
+  catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}

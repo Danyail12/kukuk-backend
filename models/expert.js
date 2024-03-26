@@ -57,70 +57,29 @@ const expertSchema = new mongoose.Schema(
     ],
     onlineInspection: [
       {
-        make: "String",
-        model: "String",
-        year: "String", 
-        vechicleVin:"string", 
-        body:"string", 
-        licensePlates:"string",
-        handTruck:"string",
-        glass:"String",
-        wiperBlades:"String"
-        ,Reflectors:"String",
-        mudFlaps:"String",
-        racking:"String",
-        coldCurtains:"String",
-        doorIssues:"String"
-        ,insurance:"String",
-        headlights:"String",
-        turnsignals:"String",
-        makerlights:"String",
-        brakeLights:"String",
-        carImages:"String",
-        RegistrationImages:"String",
-        Documents:"String",
-        location: {
-          type: {
-            type: String,
-            default: 'Point',
-          },
-          coordinates: {
-            type: [Number],
-            default: [0, 0],
-
-          }
+        onlineInspection: {
+          type:Object
         },
-        createdAt: Date,
-        userId:"String",
-      },
+        expertId:{
+          type:Object
+        },
+        user:{
+          type:Object 
+        }
+      }
     ],
     onsiteInspection: [
       {
-        make: "String",
-        model: "String",
-        year: "String", 
-        vechicleVin:"string", 
-        body:"string", 
-        licensePlates:"string",
-        handTruck:"string",
-        glass:"String",
-        wiperBlades:"String"
-        ,Reflectors:"String",
-        mudFlaps:"String",
-        racking:"String",
-        coldCurtains:"String",
-        doorIssues:"String"
-        ,insurance:"String",
-        headlights:"String",
-        turnsignals:"String",
-        makerlights:"String",
-        brakeLights:"String",
-        carImages:"String",
-        RegistrationImages:"String",
-        Documents:"String",
-        createdAt: Date,
-        userId:"String",
-      },
+        onsiteInspection: {
+          type:Object
+        },
+        expertId:{
+          type:Object
+        },
+        user:{
+          type:Object 
+        }
+      }
     ],
   
   

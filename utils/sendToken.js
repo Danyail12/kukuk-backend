@@ -18,6 +18,8 @@ export const sendToken = (res, user, statusCode, message) => {
       avatar: user.avatar,
       tasks: user.tasks,
       verified: user.verified,
+      subscription: user.subscription,
+      subscriptionEbook: user.subscriptionEbook,
       pocketGarrage: user.pocketGarrage,
       subscription: user.subscription,
       playlist: user.playlist,

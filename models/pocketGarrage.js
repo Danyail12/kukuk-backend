@@ -68,6 +68,12 @@ const pocketGarrageSchema = new mongoose.Schema({
         type:String,
         // required: true
     },
+    expertId:{
+        type:Object
+    },
+    user:{
+        type:Object
+    }
 
 })
 

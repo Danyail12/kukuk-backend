@@ -15,7 +15,9 @@ import {
   blockExpert,
   unblockExpert,
   availableBookings,
-  rescheduleBooking
+  // rescheduleBooking,
+  RescheduleBooking,
+  NotReservedExpert
 } from "../controllers/expertController.js";
 import { AuthorizedAdmin, isAuthenticated, AuthotrizedExpert } from "../middlewares/auth.js";
 
@@ -37,7 +39,9 @@ router.route("/expert/deleteSchedule/:id").delete(isAuthenticated,AuthotrizedExp
 router.route("/expert/active/:id").put( blockExpert)
 router.route("/expert/Unactived/:id").put( unblockExpert)
 router.route("/expert/availableBookings").post(isAuthenticated,availableBookings)
-router.route("/rescheduleBooking/:id").put(isAuthenticated,rescheduleBooking)
+// router.route("/rescheduleBooking/:id").put(isAuthenticated,rescheduleBooking)
+router.route("/RescheduleBooking/:id").put(isAuthenticated,RescheduleBooking)
+router.route("/NotReservedExpert").get(NotReservedExpert)
 
 
 

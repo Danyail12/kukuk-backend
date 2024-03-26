@@ -19,93 +19,99 @@ const onsiteInspectionSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    body:{
-        type: String,
-        enum: ['Defective', 'working'],
-        default: 'Defective'
+    // body:{
+    //     type: String,
+    //     enum: ['Defective', 'working'],
+    //     default: 'Defective'
+    // },
+    // licensePlates:{
+    //     type: String,
+    //     enum: ['Defective', 'working'],
+    //     default: 'Defective'
+    // },
+    // handTruck:{
+    //     type: String,
+    //     enum: ['Defective', 'working'],
+    //     default: 'Defective'
+    // },
+    // glass:{
+    //     type: String,
+    //     enum: ['Defective', 'working'],
+    //     default: 'Defective'
+    // },
+    // wiperBlades:{
+    //     type: String,
+    //     enum: ['Defective', 'working'],
+    //     default: 'Defective'
+    // },
+    // Reflectors:{
+    //     type: String,
+    //     enum: ['Defective', 'working'],
+    //     default: 'Defective'
+    // },
+    // mudFlaps:{
+    //     type: String,
+    //     enum: ['Defective', 'working'],
+    //     default: 'Defective'
+    // },
+    // racking:{
+    //     type: String,
+    //     enum: ['Defective', 'working'],
+    //     default: 'Defective'
+    // },
+    // coldCurtains:{
+    //     type: String,
+    //     enum: ['Defective', 'working'],
+    //     default: 'Defective'
+    // },
+    // doorIssues:{
+    //     type: String,
+    //     enum: ['Defective', 'working'],
+    //     default: 'Defective'
+    // },
+    // insurance:{
+    //     type: String,
+    //     enum: ['Defective', 'working'],
+    //     default: 'Defective'
+    // },
+    // headlights:{
+    //     type: String,
+    //     enum: ['Defective', 'working'],
+    //     default: 'Defective'
+    // },
+    // turnsignals:{
+    //     type: String,
+    //     enum: ['Defective', 'working'],
+    //     default: 'Defective'
+    // },
+    // makerlights:{
+    //     type: String,
+    //     enum: ['Defective', 'working'],
+    //     default: 'Defective'
+    // },
+    // brakeLights:{
+    //     type: String,
+    //     enum: ['Defective', 'working'],
+    //     default: 'Defective'
+    // },
+    // carImages:{
+    //     public_id: String,
+    //     url: String
+    // },
+    // RegistrationImages:{
+    //     public_id: String,
+    //     url: String
+    // },
+    // Documents:{
+    //     public_id: String,
+    //     url: String
+    // }
+    expertId:{
+        type:Object
     },
-    licensePlates:{
-        type: String,
-        enum: ['Defective', 'working'],
-        default: 'Defective'
+    user:{
+        type:Object
     },
-    handTruck:{
-        type: String,
-        enum: ['Defective', 'working'],
-        default: 'Defective'
-    },
-    glass:{
-        type: String,
-        enum: ['Defective', 'working'],
-        default: 'Defective'
-    },
-    wiperBlades:{
-        type: String,
-        enum: ['Defective', 'working'],
-        default: 'Defective'
-    },
-    Reflectors:{
-        type: String,
-        enum: ['Defective', 'working'],
-        default: 'Defective'
-    },
-    mudFlaps:{
-        type: String,
-        enum: ['Defective', 'working'],
-        default: 'Defective'
-    },
-    racking:{
-        type: String,
-        enum: ['Defective', 'working'],
-        default: 'Defective'
-    },
-    coldCurtains:{
-        type: String,
-        enum: ['Defective', 'working'],
-        default: 'Defective'
-    },
-    doorIssues:{
-        type: String,
-        enum: ['Defective', 'working'],
-        default: 'Defective'
-    },
-    insurance:{
-        type: String,
-        enum: ['Defective', 'working'],
-        default: 'Defective'
-    },
-    headlights:{
-        type: String,
-        enum: ['Defective', 'working'],
-        default: 'Defective'
-    },
-    turnsignals:{
-        type: String,
-        enum: ['Defective', 'working'],
-        default: 'Defective'
-    },
-    makerlights:{
-        type: String,
-        enum: ['Defective', 'working'],
-        default: 'Defective'
-    },
-    brakeLights:{
-        type: String,
-        enum: ['Defective', 'working'],
-        default: 'Defective'
-    },
-    carImages:{
-        public_id: String,
-        url: String
-    },
-    RegistrationImages:{
-        public_id: String,
-        url: String
-    },
-    Documents:{
-        public_id: String,
-        url: String
-    }
     
 })
 

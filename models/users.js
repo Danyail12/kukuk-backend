@@ -64,74 +64,36 @@ const userSchema = new mongoose.Schema({
       invoicesBill:"String"
       ,AdditionalPhotos:"String",
       additionalDocuments:"String",
+      expertId:{
+        type:String
+    },
+    user:{
+        type:String
+    },
       createdAt: Date,
     },
   ],
   onlineInspection: [
     {
-      make: "String",
-      model: "String",
-      year: "String", 
-      vechicleVin:"string", 
-      body:"string", 
-      licensePlates:"string",
-      handTruck:"string",
-      glass:"String",
-      wiperBlades:"String"
-      ,Reflectors:"String",
-      mudFlaps:"String",
-      racking:"String",
-      coldCurtains:"String",
-      doorIssues:"String"
-      ,insurance:"String",
-      headlights:"String",
-      turnsignals:"String",
-      makerlights:"String",
-      brakeLights:"String",
-      carImages:"String",
-      RegistrationImages:"String",
-      Documents:"String",
-      location: {
-        type: {
-          type: String,
-          default: 'Point',
-        },
-        coordinates: {
-          type: [Number],
-          default: [0, 0],
+      onlineInspection: {
+        type:Object
+      },
+      expertId:{
 
-        }},
-      createdAt: Date,
-      ExpertId:"String",
-    },
+        type:Object
+      },
+    }
   ],
   onsiteInspection: [
-    {
-      make: "String",
-      model: "String",
-      year: "String", 
-      vechicleVin:"string", 
-      body:"string", 
-      licensePlates:"string",
-      handTruck:"string",
-      glass:"String",
-      wiperBlades:"String"
-      ,Reflectors:"String",
-      mudFlaps:"String",
-      racking:"String",
-      coldCurtains:"String",
-      doorIssues:"String"
-      ,insurance:"String",
-      headlights:"String",
-      turnsignals:"String",
-      makerlights:"String",
-      brakeLights:"String",
-      carImages:"String",
-      RegistrationImages:"String",
-      Documents:"String",
-      createdAt: Date,
-      ExpertId:"String",
-    },
+   {
+    onsiteInspection: {
+        type:Object
+      },
+      expertId:{
+        
+        type:Object
+      },
+    }
   ],
 
 
@@ -141,12 +103,12 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
   subscription:{
-    id: String,
-    status: String
+    type: Boolean,
+    default: false,
   },
   subscriptionEbook:{
-    id: String,
-    status: String
+    type: Boolean,
+    default: false,
   },
   playlist: [
     {
