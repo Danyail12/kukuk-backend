@@ -834,10 +834,11 @@ export const onlineInspectionReport = async (req, res) => {
       user: user
           });
     await expert.save();
+    
 
     user.onlineInspection.push({
       onlineInspection: OnlineInspection,
-      expertId: expert.userName,
+      expertId: expert,
       user: user
   });
     await user.save();

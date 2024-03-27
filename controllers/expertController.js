@@ -430,7 +430,7 @@ export const RescheduleBooking = async (req, res) => {
                             ],
                         },
                     },
-                    'expertSchedule.reserved': false,
+                    'expertSchedule.reserved': false, // Filter out reserved schedules
                 },
             },
             {
@@ -469,7 +469,9 @@ export const RescheduleBooking = async (req, res) => {
                 feesPerConsaltation: expert.expertDetails.feesPerConsaltation,
                 skills: expert.expertDetails.skills,
                 expertSchedule: expert.expertSchedule.filter(schedule => (
-                    schedule.location.coordinates[0] === lon && schedule.location.coordinates[1] === lat
+                    schedule.location.coordinates[0] === lon && 
+                    schedule.location.coordinates[1] === lat &&
+                    !schedule.reserved // Filter out reserved schedules
                 )),
             })),
         });
