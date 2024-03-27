@@ -741,7 +741,7 @@ const slot = expert.expertSchedule[expertScheduleIndex];
         type: 'Point',
         coordinates: [longitude, latitude],
       },
-      expertId :slot,
+      expert :slot,
       userId : user 
     });
 
@@ -918,12 +918,12 @@ export const deleteOnlineInspection = async (req, res) => {
     await expert.updateOne({ $pull: { onlineInspection: { onlineInspection: onlineInspectionId } } });
 
     // Update the reserved field in the expert's schedule
-    const expertScheduleId = onlineInspections.expertSchedule._id;
-    const expertSchedule = expert.expertSchedule.find(schedule => schedule._id.toString() === expertScheduleId.toString());
-    if (expertSchedule) {
-      expertSchedule.reserved = false;
-      await expert.save();
-    }
+    // const expertScheduleId = onlineInspections.expertSchedule._id;
+    // const expertSchedule = expert.expertSchedule.find(schedule => schedule._id.toString() === expertScheduleId.toString());
+    // if (expertSchedule) {
+    //   expertSchedule.reserved = false;
+    //   await expert.save();
+    // }
 
     // Delete the online inspection document
     await onlineInspection.findByIdAndDelete(onlineInspectionId);
@@ -936,32 +936,60 @@ export const deleteOnlineInspection = async (req, res) => {
 };
 
 
-
 export const deleteOnsiteInspection = async (req, res) => {
   try {
-    const deletedOnsiteInspection = await onsiteInspection.findByIdAndDelete(req.params.id);
+    // Extract the onsite inspection ID from the request parameters
+    const onsiteInspectionId = req.params.id;
+    console.log('Onsite Inspection ID:', onsiteInspectionId);
 
-    if (!deletedOnsiteInspection) {
-      return res.status(404).json({ success: false, message: 'Onsite Inspection not found' });
+    // Find the onsite inspection document by its ID
+    const onsiteInspectionDoc = await onsiteInspection.findById(onsiteInspectionId);
+    if (!onsiteInspectionDoc) {
+      return res.status(404).json({ error: 'Onsite Inspection not found' });
     }
 
-    // Assuming the user model has an `onsiteInspection` array
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      { $pull: { onsiteInspection: req.params.id } },
-      { new: true }
-    );
+    // Find the associated user
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
-    res.status(200).json({
-      success: true,
-      message: 'Onsite Inspection deleted successfully',
-      data: deletedOnsiteInspection,
-    });
+    // Find the associated expert
+    const expertId = onsiteInspectionDoc.expertId;
+    console.log('Expert ID:', expertId);
+    const expert = await Expert.findById(expertId);
+    console.log('Expert:', expert);
+    
+    if (!expert) {
+      return res.status(404).json({ error: 'Associated expert not found' });
+    }
 
+    // Remove the onsite inspection from the expert's onsiteInspection array
+    expert.onsiteInspection = expert.onsiteInspection.filter(inspection => inspection._id.toString() !== onsiteInspectionId.toString());
+    await expert.save();
+
+    // Remove the onsite inspection from the user's onsiteInspection array
+    await user.updateOne({ $pull: { onsiteInspection: { _id: onsiteInspectionId } } });
+
+    // Update the reserved field in the expert's schedule
+    const expertSchedule = expert.expertSchedule.find(schedule => schedule._id.toString() === expertScheduleId.toString());
+    if (expertSchedule) {
+      expertSchedule.reserved = false;
+      await expert.save();
+    }
+
+    // Delete the onsite inspection document
+    await onsiteInspection.findByIdAndDelete(onsiteInspectionId);
+
+    res.status(200).json({ message: 'Onsite Inspection deleted successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error('Error deleting onsite inspection:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+
+
 
 
 

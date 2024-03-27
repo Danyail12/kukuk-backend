@@ -79,23 +79,19 @@ const userSchema = new mongoose.Schema({
         type:Object
       },
       expertId:{
-
         type:Object
       },
     }
   ],
   onsiteInspection: [
-   {
-    onsiteInspection: {
+    {
+      onsiteInspection: {
         type:Object
       },
       expertId:{
-        
         type:Object
-      },
-    }
-  ],
-
+      }
+    } ],
 
   
   verified: {
