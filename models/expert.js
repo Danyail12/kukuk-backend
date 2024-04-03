@@ -44,27 +44,21 @@ const expertSchema = new mongoose.Schema(
     },
     pocketGarrage: [
       {
-        name: "String",
-         email: "String",
-          description: "String", 
-          expires:"string", carBrand:"string", carModel:"string",year:"string",certificates:"String",
-        carImages:"String"
-        ,Registration:"String",InspectionCertificates:"String",
-        historyString:"String",ownershipHistory:"String",invoicesBill:"String"
-        ,AdditionalPhotos:"String",additionalDocuments:"String",
-        createdAt: Date,
-      },
-    ],
+        pocketGarrage: {
+          type: Object
+        },
+       expert:{
+         type: Object
+       }
+  
+    }],
     onlineInspection: [
       {
-        onlineInspection: {
-          type:Object
-        },
-        expertId:{
-          type:Object
+        online: {
+          type: Object
         },
         user:{
-          type:Object 
+          type:Object
         }
       }
     ],

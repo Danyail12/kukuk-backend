@@ -4,14 +4,7 @@ import mongoose from "mongoose";
 
 const pocketGarrageSchema = new mongoose.Schema({
 
-    name: {
-        type: String,
-        // required: true
-    },
-    email: {
-        type: String,
-        // required: true
-    },
+   
     description:{
         type: String,
         // required: true
@@ -48,6 +41,10 @@ const pocketGarrageSchema = new mongoose.Schema({
         type:String,
         // required: true
     },
+    TÜVInspectionCertificate:{
+        type:String,
+        // required: true
+    },
     historyFile:{
         type:String,
         // required: true
@@ -68,13 +65,7 @@ const pocketGarrageSchema = new mongoose.Schema({
         type:String,
         // required: true
     },
-    expertId:{
-        type:Object
-    },
-    user:{
-        type:Object
-    }
-
+   
 })
 
 

@@ -741,14 +741,11 @@ const slot = expert.expertSchedule[expertScheduleIndex];
         type: 'Point',
         coordinates: [longitude, latitude],
       },
-      expert :slot,
-      userId : user 
     });
 
 
-    await OnsiteInspectionReport.save();
-  
-
+    
+    
     // Add the online inspection to the expert's onlineInspection array
     expert.onsiteInspection.push({
       onsiteInspection: OnsiteInspectionReport,
@@ -761,10 +758,11 @@ const slot = expert.expertSchedule[expertScheduleIndex];
       onsiteInspection: OnsiteInspectionReport,       
       expertId: slot,
       user: user,
-
+      
     });
     await user.save();
-
+    
+    await OnsiteInspectionReport.save();
     res.status(201).json({ 
       success: true,
       message: 'Online inspection created successfully',
@@ -790,59 +788,45 @@ export const onlineInspectionReport = async (req, res) => {
         return res.status(404).json({ success: false, message: 'Expert not found' });
     }
 
-    // const expertScheduleId = req.body.expertScheduleId;
-    // if(!expertScheduleId) {
-    //   return res.status(404).json({ success: false, message: 'Expert schedule not found' });
-    // }
+    const { make, model, year, vechicleVin, licensePlates, handTruck, glass, wiperBlades, Reflectors, mudFlaps, racking, coldCurtains, doorIssues, insurance, headlights, turnsignals, makerlights, brakeLights, carImages, RegistrationImages, Documents } = req.body;
 
-    const OnlineInspection = await onlineInspection.create({
-      make: req.body.make,
-      model: req.body.model,
-      year: req.body.year,
-      vechicleVin: req.body.vechicleVin,
-      licensePlates: req.body.licensePlates,
-      handTruck: req.body.handTruck,
-      glass: req.body.glass,
-      wiperBlades: req.body.wiperBlades,
-      Reflectors: req.body.Reflectors,
-      mudFlaps: req.body.mudFlaps,
-      racking : req.body.racking,
-      coldCurtains: req.body.coldCurtains,
-      doorIssues: req.body.doorIssues,
-      insurance: req.body.insurance,
-      headlights: req.body.headlights,
-      turnsignals: req.body.turnsignals,
-      makerlights: req.body.makerlights,
-      brakeLights: req.body.brakeLights,
-      carImages: req.body.carImages,
-      RegistrationImages: req.body.RegistrationImages,
-      Documents: req.body.Documents, 
-    });
-    await OnlineInspection.save();
     
-    // const expertScheduleIndex = expert.expertSchedule.findIndex(schedule => schedule._id.toString() === expertScheduleId.toString());
-    // if (expertScheduleIndex !== -1) {
-    //   expert.expertSchedule[expertScheduleIndex].reserved = true;
-    //   await expert.save();
-    // }
-    // const slot = expert.expertSchedule[expertScheduleIndex];
-
-    // Add the online inspection to the expert's onlineInspection array
+    const OnlineInspection = new onlineInspection({
+      make,
+      model,
+      year,
+      vechicleVin,
+      licensePlates,
+      handTruck,
+      glass,
+      wiperBlades,
+      Reflectors,
+      mudFlaps,
+      racking,
+      coldCurtains,
+      doorIssues,
+      insurance,
+      headlights,
+      turnsignals,
+      makerlights,
+      brakeLights,
+      carImages,
+      RegistrationImages,
+      Documents,
+    })
+    await OnlineInspection.save();
+  
     expert.onlineInspection.push({
-      onlineInspection: OnlineInspection,
-      expertId:expert.userName,
-      user: user
-          });
+      online: OnlineInspection, 
+      user: user,
+    });
     await expert.save();
     
-
     user.onlineInspection.push({
-      onlineInspection: OnlineInspection,
-      expertId: expert,
-      user: user
-  });
+      online: OnlineInspection, 
+      expert: expert.fullName,
+    });
     await user.save();
-
     res.status(201).json({ 
       success: true, 
       message: 'Report submitted successfully',
@@ -857,15 +841,17 @@ export const onlineInspectionReport = async (req, res) => {
 
 export const getOnlineInspection = async (req, res) => {
   try {
-    // Retrieve the user from the database
+    // Find the user by ID
     const user = await User.findById(req.user._id);
+    
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-    
-    
-    // Return the populated expert schedule and all online inspection data objects
-    res.status(200).json({ success: true, onlineInspection: user.onlineInspection });
+
+
+  // const onlineInspections = await onlineInspection.find({ user: user._id });
+    res.status(200).json({ success: true,
+       result:user.onlineInspection });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: 'Internal Server Error' });

@@ -107,24 +107,9 @@ const onlineInspectionSchema = new mongoose.Schema({
         public_id: String,
         url: String
     },
-    location: {
-        type: {
-          type: String,
-          default: 'Point',
-        },
-        coordinates: {
-          type: [Number],
-          default: [0, 0],
-  
-        },
-        expertId:{
-            type:Object
-        },
-        user:{
-            type:Object
-        }
+
       }
-})
+)
 
 
 

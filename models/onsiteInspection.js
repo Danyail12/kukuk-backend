@@ -106,12 +106,12 @@ const onsiteInspectionSchema = new mongoose.Schema({
     //     public_id: String,
     //     url: String
     // }
-    expertId:{
-        type:Object
-    },
-    user:{
-        type:Object
-    },
+    // expertId:{ 
+    //     type:Object
+    // },
+    // user:{
+    //     type:Object
+    // },
     
 })
 
