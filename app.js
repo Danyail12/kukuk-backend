@@ -42,6 +42,7 @@ app.use("/api/v1",Product)
 app.use("/api/v1",other)
 app.use("/api/v1",payment)
 
+console.log(process.env.AWS_ACCESS_KEY_ID)
 
 cron.schedule('0 12 * * *', async () => {
   try {

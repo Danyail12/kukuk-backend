@@ -1,6 +1,50 @@
 import course from "../models/course.js";
 import Stats from "../models/Stats.js";
 
+import AWS from 'aws-sdk';
+
+
+
+AWS.config.update({
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: 'us-east-1',
+});
+
+const s3 = new AWS.S3({ endpoint: 'https://s3.hidrive.strato.com', params: { Bucket: 'kukuk' } });
+
+const aws_upload = (params) => {
+    return new Promise((resolve, reject) => {
+        // const { fileName, file } = params.image; // Destructure fileName and file directly from params.image
+        // const buf = Buffer.from(file.replace(/^data:.+;base64,/, ""), "base64");
+        const currentTime = new Date().getTime(); // Add parentheses to getTime() to call the function
+        const data = {
+            Key: `${currentTime}`,
+            Body: params.file,
+            ContentEncoding: 'base64',
+            ACL: 'public-read',
+        };
+        s3.putObject(data, function(err, s3Data) { // Pass data instead of params to putObject
+            if (err) {
+                console.log(err);
+                reject(err);
+            } else {
+                console.log(`File uploaded successfully. ${s3Data}`);
+                resolve(s3Data);
+            }
+        });
+    });
+};
+
+export const upload_aws = async (req, res) => {
+    try {
+        const location = await aws_upload(req.body); // Pass req.body directly
+        res.status(200).json({ location });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
 
 export const getCourse = async (req, res) => {
     try {

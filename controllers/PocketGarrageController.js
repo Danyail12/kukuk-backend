@@ -177,7 +177,9 @@ export const createPocketGarrage = async (req, res) => {
           if(!user){
             return res.status(404).json({ success: false, message: 'User not found' });
           }
-          res.status(200).json({ success: true, message: 'Pocket garrage fetched successfully', pocket: user.pocketGarrage });
+          res.status(200).json({ success: true, message: 'Pocket garrage fetched successfully',
+           pocket: user.pocketGarrage 
+          });
         } catch (error) {
           console.error('Error getting pocket garrage:', error);
           res.status(500).json({ success: false, message: 'Something went wrong' });

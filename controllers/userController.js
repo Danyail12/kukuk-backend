@@ -130,22 +130,24 @@ export const updateProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
 
-    const { name } = req.body;
-    const avatar = req.files.avatar.tempFilePath;
+    const { name,email } = req.body;
 
+    // const avatar = req.files.avatar.tempFilePath;
+//  ...req.body;
     if (name) user.name = name;
-    if (avatar) {
-      await cloudinary.v2.uploader.destroy(user.avatar.public_id);
+    if (email) user.email = email;
+    // if (avatar) {
+    //   await cloudinary.v2.uploader.destroy(user.avatar.public_id);
 
-      const mycloud = await cloudinary.v2.uploader.upload(avatar);
+    //   // const mycloud = await cloudinary.v2.uploader.upload(avatar);
 
-      fs.rmSync("./tmp", { recursive: true });
+    //   // fs.rmSync("./tmp", { recursive: true });
 
-      user.avatar = {
-        public_id: mycloud.public_id,
-        url: mycloud.secure_url,
-      };
-    }
+    //   user.avatar = {
+    //     public_id: mycloud.public_id,
+    //     url: mycloud.secure_url,
+    //   };
+    // }
 
     await user.save();
 
