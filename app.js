@@ -29,7 +29,7 @@ dotenv.config({
 });
 
 const corsOptions = {
-    origin: 'https://admin-panel-eight-delta.vercel.app',
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH','HEAD'],
     credentials: true,
 }
