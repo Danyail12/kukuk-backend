@@ -16,6 +16,12 @@ import dotenv from "dotenv";
 import cors from "cors";
 import bodyParser from "body-parser";
 import Stripe from "stripe";
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import {  ListBucketsCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+// import {ListObjectsCommand} from '@aws-sdk/client-s3';
+// import { formatUrl } from '@aws-sdk/util-format-url';
+import {getSignedUrl} from '@aws-sdk/s3-request-presigner';
+
 
 
 dotenv.config({
@@ -79,6 +85,56 @@ cron.schedule('0 0 1 * *', async () => {
   catch (error) {
     console.log(error);
   }})
+
+  const s3 = new S3Client({
+    region: process.env.AWS_REGION,
+    endpoint: process.env.AWS_ENDPOINT,
+    credentials: {
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        signatureVersion: 'v4',
+      }
+});
+
+async function getObjectUrl(key) {
+    const command = new PutObjectCommand({
+        Bucket: process.env.AWS_BUCKET,
+        Key: key
+    });
+    const url = await getSignedUrl(s3, command);
+    return url;
+
+    // console.log(url + 'url');
+}
+
+async function putObject(fileName, contentType) {
+    const command = new PutObjectCommand({
+        Bucket: process.env.AWS_BUCKET,
+        Key: `/uploads/user-uploads/${fileName}`,
+        ContentType: contentType
+    });
+    const url = await getSignedUrl(s3, command);
+    return url;
+}
+const listBuckets = async () => {
+  try {
+    const data = await s3.send(new ListBucketsCommand({}));
+    console.log('Buckets:', data.Buckets);
+  } catch (err) {
+    console.error('Error listing buckets:', err);
+  }
+};
+
+
+async function init(){
+    // console.log("url is "+ await getObjectUrl("uploads/user-uploads/image-201714679201722.jpg"  ));
+    // console.log("put object url is "+ await putObject(`image ${Date.now()}/.jpg`, "image/jpg"));
+    listBuckets();
+}
+
+init();
+
+
 
 app.get("/", (req, res) => {
   res.send("Server is working");
