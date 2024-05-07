@@ -64,7 +64,9 @@ export const createExpert = async (req, res) => {
 
   export const getExperts = async (req, res) => {
     try {
-        const experts = await Expert.find();
+        const experts = await Expert.find({}, 'userName email country city specialization feesPerConsaltation');
+        // This will only fetch the specified fields from the database
+
         res.status(200).json({
             success: true,
             message: "Experts fetched successfully",
@@ -77,6 +79,7 @@ export const createExpert = async (req, res) => {
         });
     }
 }
+
 export const availableBookings = async (req, res) => {
   try {
       // Extract time and date from the request body
