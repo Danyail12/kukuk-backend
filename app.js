@@ -127,9 +127,9 @@ const listBuckets = async () => {
 
 
 async function init(){
-    // console.log("url is "+ await getObjectUrl("uploads/user-uploads/image-201714679201722.jpg"  ));
+    // console.log("url is "+ await getObjectUrl("uploads/user-uploads/image-hassan.jpg"  ));
     // console.log("put object url is "+ await putObject(`image ${Date.now()}/.jpg`, "image/jpg"));
-    listBuckets();
+    // listBuckets();
 }
 
 init();
