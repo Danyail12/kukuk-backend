@@ -622,41 +622,14 @@ export const logout = async (req, res) => {
   }
 };
 
-export const getExpertBookingSessions = async (req, res) => {
+export const  getExpertBookingSessions = async (req, res) => {
   try {
-    const expert = await Expert.findById(req.user._id).populate({
-      path: 'bookingsession',
-      populate: {
-        path: 'booking',
-        populate: {
-          path: 'user', // Populate the user field within the booking object
-          select: 'fullName email', // Select the fields you want to include for the user
-        },
-      },
-    });
-
-    if (!expert) {
-      return res.status(404).json({ success: false, message: "Expert not found" });
-    }
-
-    const bookingSessionsWithUsers = expert.bookingsession.map(session => ({
-      _id: session._id,
-      booking: session.booking,
-      user: session.booking.user, // Include user details here
-    }));
-
-    res.status(200).json({ success: true, bookingSessions: bookingSessionsWithUsers });
+    const expert = await Expert.findById(req.user._id);
+    res.status(200).json({ success: true, bookings: expert.bookingsession });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 }
-
-
-
-
-
-
-
 
 export const getExpertPockets = async (req, res) => {
   try {
