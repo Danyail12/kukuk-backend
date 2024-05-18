@@ -1,11 +1,11 @@
-import { sendMail } from "../utils/sendMail.js";
-import { sendToken } from "../utils/sendToken.js";
 import { expertSendToken } from "../utils/expertSendToken.js";
 import expertSchedule from "../models/expertSchedule.js";
 import Expert from "../models/expert.js";
 import BookingSession from "../models/bookingSession.js";
 import { User } from "../models/users.js";
-import ExpertSchedule from "../models/expertSchedule.js";
+import report from "../models/report.js";
+
+
 
 export const createExpert = async (req, res) => {
     try {
@@ -660,8 +660,8 @@ export const getExpertBookingSessions = async (req, res) => {
 
 export const getExpertPockets = async (req, res) => {
   try {
-    const expert = await Expert.findById(req.user._id).populate('pocketGarrage');
-    res.status(200).json({ success: true, pockets: expert.pockets });
+    const expert = await Expert.findById(req.user._id);
+    res.status(200).json({ success: true, pockets: expert.pocketGarrage });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -671,7 +671,7 @@ export const getExpertPockets = async (req, res) => {
 export const getExpertOnlineInspections = async (req, res) => {
   try {
     const expert = await Expert.findById(req.user._id).populate('onsiteInspection');
-    res.status(200).json({ success: true, inspections: expert.onsiteInspection });
+    res.status(200).json({ success: true, inspections: expert.onlineInspection });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -862,3 +862,66 @@ export const NotReservedExpert = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 }
+
+
+export const addReport = async (req, res) => {  
+try{
+const {description,damage,id} = req.body;
+const expert = await Expert.findById(req.user._id);
+const user = await User.findById(id);
+
+const information = new report({
+  description,
+  damage,
+  userId: user._id,
+  expertId: expert._id,
+});
+
+await information.save();
+
+
+user.reportDelivery.push({
+  details: information,
+
+});
+
+await user.save();
+
+expert.reportDelivery.push({
+  details: information,
+});
+
+await expert.save();
+
+res.status(200).json({ success: true, message: 'Report created successfully', Report: information });
+
+
+}catch(error){ 
+
+res.status(500).json({ success: false, message: error.message });
+}
+
+
+}
+
+
+export const getReport = async (req, res) => {  
+  try{
+  const expert = await Expert.findById(req.user._id);
+  res.status(200).json({ success: true, data: expert.reportDelivery });
+}catch(error){
+  res.status(500).json({ success: false, message: error.message });
+}
+}
+
+export const getReportForUser = async (req, res) => {  
+  try{
+  const user = await User.findById(req.params.id);
+  res.status(200).json({ success: true, data: user.reportDelivery });
+}catch(error){
+  res.status(500).json({ success: false, message: error.message });
+}
+}
+
+
+

@@ -148,7 +148,9 @@ const expertSchema = new mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: "Report",
         },
-        poster: String,
+        details:{
+          type:Object
+        }
       }
     ],
     

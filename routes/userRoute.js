@@ -28,8 +28,11 @@ import {
   updateOnsiteInspection,
   updateOnlineInspection,
   getallBookingSession,
+  
 } from "../controllers/userController.js";
 import { AuthorizedAdmin, isAuthenticated } from "../middlewares/auth.js";
+
+import {getReportForUser} from "../controllers/expertController.js";
 
 const router = express.Router();
 
@@ -60,7 +63,9 @@ router.route("/deleteOnlineInspection/:id").delete(isAuthenticated,deleteOnlineI
 router.route("/deleteOnsiteInspection/:id").delete(isAuthenticated,deleteOnsiteInspection);
 router.route("/updateOnsiteInspection/:id").put(isAuthenticated, updateOnsiteInspection);
 router.route("/updateOnlineInspection/:id").put(isAuthenticated, updateOnlineInspection);
+// router.route("/getAllExperts").get(getAllExperts);
 router.route("/getallBookingSession").get(getallBookingSession);
+router.route("/getReportForUser").get(isAuthenticated,getReportForUser)
 
 
 export default router;

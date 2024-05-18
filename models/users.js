@@ -36,16 +36,6 @@
               default: "user",
       
           },
-    
-
-    tasks: [
-      {
-        title: "String",
-        description: "String",
-        completed: Boolean,
-        createdAt: Date,
-      },
-    ],
     pocketGarrage: [
     {
       pocketGarrage:{
@@ -126,13 +116,15 @@
     }
   ],
 
-  report:[
+  reportDelivery:[
     {
       instanceReport: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Report",
       },
-      poster: String,
+      details:{
+        type:Object,
+      }
     }
   ],
 

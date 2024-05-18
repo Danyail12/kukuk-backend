@@ -17,7 +17,12 @@ import {
   availableBookings,
   // rescheduleBooking,
   RescheduleBooking,
-  NotReservedExpert
+  NotReservedExpert,
+  getExpertPockets,
+  getExpertOnlineInspections,
+  getExpertOnsiteInspections,
+  addReport,
+  getReport
 } from "../controllers/expertController.js";
 import { AuthorizedAdmin, isAuthenticated, AuthotrizedExpert } from "../middlewares/auth.js";
 
@@ -39,9 +44,15 @@ router.route("/expert/deleteSchedule/:id").delete(isAuthenticated,AuthotrizedExp
 router.route("/expert/active/:id").put( blockExpert)
 router.route("/expert/Unactived/:id").put( unblockExpert)
 router.route("/expert/availableBookings").post(isAuthenticated,availableBookings)
-// router.route("/rescheduleBooking/:id").put(isAuthenticated,rescheduleBooking)
 router.route("/RescheduleBooking/:id").put(isAuthenticated,RescheduleBooking)
 router.route("/NotReservedExpert").get(NotReservedExpert)
+router.route("/getExpertPockets").get(isAuthenticated,AuthotrizedExpert,getExpertPockets)
+router.route("/getExpertOnlineInspections").get(isAuthenticated,AuthotrizedExpert,getExpertOnlineInspections)
+router.route("/getExpertOnsiteInspections").get(isAuthenticated,AuthotrizedExpert,getExpertOnsiteInspections)
+// router.route("/getExpertSchedule").get(isAuthenticated,AuthotrizedExpert,getExpertSchedule)
+router.route("/expert/deleteSchedule/:id").delete(isAuthenticated,AuthotrizedExpert, deleteExpertSchedule)
+router.route("/expert/addReport").post(isAuthenticated,AuthotrizedExpert, addReport)
+router.route("/expert/getReport").get(isAuthenticated,AuthotrizedExpert, getReport)
 
 
 
