@@ -22,7 +22,9 @@ import {
   getExpertOnlineInspections,
   getExpertOnsiteInspections,
   addReport,
-  getReport
+  getReport,
+  getExpertsAppointment,
+  getNotification
 } from "../controllers/expertController.js";
 import { AuthorizedAdmin, isAuthenticated, AuthotrizedExpert } from "../middlewares/auth.js";
 
@@ -53,11 +55,6 @@ router.route("/getExpertOnsiteInspections").get(isAuthenticated,AuthotrizedExper
 router.route("/expert/deleteSchedule/:id").delete(isAuthenticated,AuthotrizedExpert, deleteExpertSchedule)
 router.route("/expert/addReport").post(isAuthenticated,AuthotrizedExpert, addReport)
 router.route("/expert/getReport").get(isAuthenticated,AuthotrizedExpert, getReport)
-
-
-
-
-
-
-
+router.route("/getExpertsAppointment").get(isAuthenticated,AuthotrizedExpert, getExpertsAppointment)
+router.route("/getNotification").get(isAuthenticated,AuthotrizedExpert, getNotification)
 export default router;

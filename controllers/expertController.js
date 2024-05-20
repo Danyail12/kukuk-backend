@@ -4,9 +4,10 @@ import Expert from "../models/expert.js";
 import BookingSession from "../models/bookingSession.js";
 import { User } from "../models/users.js";
 import report from "../models/report.js";
+import {parse,isValid} from "date-fns"
 
 
-
+ 
 export const createExpert = async (req, res) => {
     try {
       const {
@@ -640,25 +641,121 @@ export const getExpertPockets = async (req, res) => {
   }
 }
 
-
 export const getExpertOnlineInspections = async (req, res) => {
   try {
-    const expert = await Expert.findById(req.user._id).populate('onsiteInspection');
-    res.status(200).json({ success: true, inspections: expert.onlineInspection });
+    // Find the expert by ID
+    const expert = await Expert.findById(req.user._id);
+
+    if (!expert) {
+      return res.status(404).json({ success: false, message: 'Expert not found' });
+    }
+
+    // Populate the onlineInspection array with the online data and user's name and email
+    await expert.populate({
+      path: 'onlineInspection.online',
+      populate: {
+        path: 'user',
+        select: 'name email' // Include only the name and email fields of the user
+      }
+    });
+
+    // Extract the relevant data from the populated expert object
+    const inspections = expert.onlineInspection.map(inspection => {
+      return {
+        onlineInspection: {
+          make: inspection.online ? inspection.online.make : null,
+          model: inspection.online ? inspection.online.model : null,
+          year: inspection.online ? inspection.online.year : null,
+          vehicleVin: inspection.online ? inspection.online.vechicleVin : null,
+          body: inspection.online ? inspection.online.body : null,
+          licensePlates: inspection.online ? inspection.online.licensePlates : null,
+          handTruck: inspection.online ? inspection.online.handTruck : null,
+          glass: inspection.online ? inspection.online.glass : null,
+          wiperBlades: inspection.online ? inspection.online.wiperBlades : null,
+          Reflectors: inspection.online ? inspection.online.Reflectors : null,
+          mudFlaps: inspection.online ? inspection.online.mudFlaps : null,
+          racking: inspection.online ? inspection.online.racking : null,
+          coldCurtains: inspection.online ? inspection.online.coldCurtains : null,
+          doorIssues: inspection.online ? inspection.online.doorIssues : null,
+          insurance: inspection.online ? inspection.online.insurance : null,
+          headlights: inspection.online ? inspection.online.headlights : null,
+          turnsignals: inspection.online ? inspection.online.turnsignals : null,
+          makerlights: inspection.online ? inspection.online.makerlights : null,
+          brakeLights: inspection.online ? inspection.online.brakeLights : null,
+          location: inspection.online ? inspection.online.location : null,
+          _id: inspection.online ? inspection.online._id : null
+        },
+        user: inspection.user ? {
+          name: inspection.user.name,
+          email: inspection.user.email
+        } : null
+      };
+    });
+
+    res.status(200).json({ success: true, inspections: inspections });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
-}
+};
 
 
 export const getExpertOnsiteInspections = async (req, res) => {
   try {
-    const expert = await Expert.findById(req.user._id).populate('onsiteInspection');
-    res.status(200).json({ success: true, inspections: expert.onsiteInspection });
+    const expert = await Expert.findById(req.user._id)
+      .populate({
+        path: 'onsiteInspection.onsiteInspection',
+        populate: {
+          path: 'user',
+          select: 'name email'  // Include only the name and email fields of the user
+        }
+      });
+
+    if (!expert) {
+      return res.status(404).json({ success: false, message: 'Expert not found' });
+    }
+
+    const inspections = expert.onsiteInspection.map(inspection => {
+      if (inspection.onsiteInspection) {
+        return {
+          make: inspection.onsiteInspection.make,
+          model: inspection.onsiteInspection.model,
+          year: inspection.onsiteInspection.year,
+          vehicleVin: inspection.onsiteInspection.vechicleVin,
+          licensePlates: inspection.onsiteInspection.licensePlates,
+          handTruck: inspection.onsiteInspection.handTruck,
+          glass: inspection.onsiteInspection.glass,
+          wiperBlades: inspection.onsiteInspection.wiperBlades,
+          reflectors: inspection.onsiteInspection.reflectors,
+          mudFlaps: inspection.onsiteInspection.mudFlaps,
+          racking: inspection.onsiteInspection.racking,
+          coldCurtains: inspection.onsiteInspection.coldCurtains,
+          doorIssues: inspection.onsiteInspection.doorIssues,
+          insurance: inspection.onsiteInspection.insurance,
+          headlights: inspection.onsiteInspection.headlights,
+          turnSignals: inspection.onsiteInspection.turnSignals,
+          markerLights: inspection.onsiteInspection.markerLights,
+          brakeLights: inspection.onsiteInspection.brakeLights,
+          carImages: inspection.onsiteInspection.carImages,
+          registrationImages: inspection.onsiteInspection.registrationImages,
+          documents: inspection.onsiteInspection.documents,
+          _id: inspection.onsiteInspection._id,
+          user: inspection.onsiteInspection.user ? {
+            name: inspection.onsiteInspection.user.name || '',
+            email: inspection.onsiteInspection.user.email || ''
+          } : null
+        };
+      } else {
+        return null; // Return null for entries without a valid onsiteInspection object
+      }
+    }).filter(inspection => inspection !== null); // Filter out null entries
+    
+
+    res.status(200).json({ success: true, onsiteInspections: inspections });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
-}
+};
+
 
 export const ScheduleBooking = async (req, res) => {
   try {
@@ -896,5 +993,40 @@ export const getReportForUser = async (req, res) => {
 }
 }
 
+export const getNotification = async (req, res) => {  
+  try{
+  const expert = await Expert.findById(req.user._id);
+  res.status(200).json({ success: true, data: expert.notification });
+}catch(error){
+  res.status(500).json({ success: false, message: error.message });
+}
+}
+
+
+export const getExpertsAppointment = async (req, res) => {  
+  const { date, time, expertId } = req.query;
+
+  if (!date || !time || !expertId) {
+      return res.status(400).send('Date, time, and expert ID are required');
+  }
+
+  // Parse and validate the date
+  const parsedDate = parse(date, 'yy-MM-dd', new Date());
+  if (!isValid(parsedDate)) {
+      return res.status(400).send('Invalid date format');
+  }
+
+  try {
+      const bookingSessions = await BookingSession.find({
+          date: parsedDate,
+          time: time,
+          expertId: expertId
+      });
+
+      res.json(bookingSessions);
+  } catch (err) {
+      res.status(500).send(err.message);
+  }
+}
 
 
