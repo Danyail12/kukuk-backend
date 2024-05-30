@@ -24,6 +24,9 @@ const reportSchema = new mongoose.Schema({
     expires:{
         type: Date,
         // required: true
+    },
+    onsiteId:{
+        type: String,
     }
 })
 

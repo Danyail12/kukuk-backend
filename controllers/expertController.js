@@ -933,57 +933,56 @@ export const NotReservedExpert = async (req, res) => {
 }
 
 
-export const addReport = async (req, res) => {  
-try{
-const {description,damage,id} = req.body;
-const expert = await Expert.findById(req.user._id);
-const user = await User.findById(id);
+export const addReport = async (req, res) => {
+  try {
+    const { description, damage, id, onsite } = req.body;
+    const expert = await Expert.findById(req.user._id);
+    if (!expert) {
+      return res.status(404).json({ success: false, message: 'Expert not found' });
+    }
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
 
-const information = new Report({
-  description,
-  damage,
-  userId: user._id,
-  expertId: expert._id,
-});
+    const information = new Report({
+      description,
+      damage,
+      onsiteId: onsite,
+      userId: user._id,
+      expertId: expert._id,
+    });
 
-await information.save();
+    await information.save();
 
+    user.reportDelivery.push({
+      instanceReport: information._id,
+      details: information,
+    });
 
-user.reportDelivery.push({
-  details: information,
+    await user.save();
 
-});
+    expert.reportDelivery.push({
+      instanceReport: information._id,
+      details: information,
+    });
 
-await user.save();
+    await expert.save();
 
-expert.reportDelivery.push({
-  details: information,
-});
-
-await expert.save();
-
-res.status(200).json({ success: true, message: 'Report created successfully', Report: information });
-
-
-}catch(error){ 
-
-res.status(500).json({ success: false, message: error.message });
-}
-
-
-}
+    res.status(200).json({ success: true, message: 'Report created successfully', Report: information });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 
 export const getReport = async (req, res) => {
   try {
-    const reportId = req.body.id; 
-    // console.log(reportId);
-    console.log(reportId);
+    const { id: onsiteId } = req.body;
 
-    const report = await Report.findById(reportId);
-    console.log(report);
-
-    if (!report) {
+    const report = await Report.find({ onsiteId });
+    
+    if (!report || report.length === 0) {
       return res.status(404).json({ success: false, message: 'Report not found' });
     }
 
@@ -992,6 +991,7 @@ export const getReport = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 export const getReportForExpert = async (req, res) => {  
   try{
