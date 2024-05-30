@@ -142,6 +142,10 @@
   otp_expiry: Date,
   resetPasswordOtp: Number,
   resetPasswordOtpExpiry: Date,
+  fcmToken: {
+    type: String,
+    default: '',
+  }
   });
 
   userSchema.pre("save", async function (next) {

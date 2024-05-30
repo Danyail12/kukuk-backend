@@ -158,6 +158,10 @@ const expertSchema = new mongoose.Schema(
     otp_expiry: Date,
     resetPasswordOtp: Number,
     resetPasswordOtpExpiry: Date,
+    fcmToken: {
+      type: String,
+      default: '',
+    },
   },
   {
     timestamps: true,

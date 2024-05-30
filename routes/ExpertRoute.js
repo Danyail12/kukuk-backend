@@ -24,7 +24,8 @@ import {
   addReport,
   getReport,
   getExpertsAppointment,
-  getNotification
+  getNotification,
+  getReportForExpert
 } from "../controllers/expertController.js";
 import { AuthorizedAdmin, isAuthenticated, AuthotrizedExpert } from "../middlewares/auth.js";
 
@@ -57,4 +58,5 @@ router.route("/expert/addReport").post(isAuthenticated,AuthotrizedExpert, addRep
 router.route("/expert/getReport").get(isAuthenticated,AuthotrizedExpert, getReport)
 router.route("/getExpertsAppointment").get(isAuthenticated,AuthotrizedExpert, getExpertsAppointment)
 router.route("/getNotification").get(isAuthenticated,AuthotrizedExpert, getNotification)
+router.route("/expert/getReportForExpert").get(isAuthenticated,AuthotrizedExpert, getReportForExpert)
 export default router;

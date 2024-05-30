@@ -3,7 +3,7 @@ import expertSchedule from "../models/expertSchedule.js";
 import Expert from "../models/expert.js";
 import BookingSession from "../models/bookingSession.js";
 import { User } from "../models/users.js";
-import report from "../models/report.js";
+import Report from "../models/report.js";
 import {parse,isValid} from "date-fns"
 
 
@@ -544,46 +544,45 @@ export const getBookingSessionsForExpert = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, fcmToken } = req.body;
+
     console.log('Email:', email);
     console.log('Password:', password);
+    console.log('FCM Token:', fcmToken);
 
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Please enter all fields" });
+      return res.status(400).json({ success: false, message: "Please enter all fields" });
     }
 
     const expert = await Expert.findOne({ email }).select("+password");
     console.log('Expert:', expert);
 
     if (!expert) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid Email or Password" });
+      return res.status(400).json({ success: false, message: "Invalid Email or Password" });
     }
 
-    if(expert.status === "Unactived") {
-      return res
-        .status(400)
-        .json({ success: false, message: "Your account has been blocked" });
+    if (expert.status === "Unactived") {
+      return res.status(400).json({ success: false, message: "Your account has been blocked" });
     }
 
     const isMatch = await expert.comparePassword(password);
     console.log('isMatch:', isMatch);
 
     if (!isMatch) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid Email or Password" });
+      return res.status(400).json({ success: false, message: "Invalid Email or Password" });
     }
+
+    // Update the expert's FCM token
+    expert.fcmToken = fcmToken;
+    await expert.save();
 
     expertSendToken(res, expert, 200, "Login Successful");
   } catch (error) {
-    console.error(error); // Log any errors for debugging
+    console.error(error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 
 // export const verify = async (req, res) => {
@@ -940,7 +939,7 @@ const {description,damage,id} = req.body;
 const expert = await Expert.findById(req.user._id);
 const user = await User.findById(id);
 
-const information = new report({
+const information = new Report({
   description,
   damage,
   userId: user._id,
@@ -975,7 +974,26 @@ res.status(500).json({ success: false, message: error.message });
 }
 
 
-export const getReport = async (req, res) => {  
+export const getReport = async (req, res) => {
+  try {
+    const reportId = req.body.id; 
+    // console.log(reportId);
+    console.log(reportId);
+
+    const report = await Report.findById(reportId);
+    console.log(report);
+
+    if (!report) {
+      return res.status(404).json({ success: false, message: 'Report not found' });
+    }
+
+    res.status(200).json({ success: true, data: report });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getReportForExpert = async (req, res) => {  
   try{
   const expert = await Expert.findById(req.user._id);
   res.status(200).json({ success: true, data: expert.reportDelivery });
@@ -983,6 +1001,7 @@ export const getReport = async (req, res) => {
   res.status(500).json({ success: false, message: error.message });
 }
 }
+
 
 export const getReportForUser = async (req, res) => {  
   try{

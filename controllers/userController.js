@@ -10,8 +10,6 @@ import onlineInspection from "../models/onlineInspection.js";
 import onsiteInspection from "../models/onsiteInspection.js";
 import Reason from "../models/Reason.js";
 import stats from "../models/Stats.js";
-// import course from "../models/course.js";
-import cloudinary from "cloudinary";
 import fs from "fs";
 import ExpertSchedule from "../models/expertSchedule.js";
 import expert from "../models/expert.js";
@@ -72,7 +70,7 @@ export const verify = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password,fcmToken } = req.body;
 
     if (!email || !password) {
       return res
@@ -81,7 +79,7 @@ export const login = async (req, res) => {
     }
 
     const user = await User.findOne({ email }).select("+password");
-
+console.log(user)
     if (!user) {
       return res
         .status(400)
@@ -95,7 +93,8 @@ export const login = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Invalid Email or Password" });
     }
-
+    user.fcmToken = fcmToken;
+    await user.save();
     sendToken(res, user, 200, "Login Successful");
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

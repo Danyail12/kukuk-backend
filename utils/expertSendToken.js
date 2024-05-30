@@ -23,7 +23,8 @@ export const expertSendToken = (res, Expert, statusCode, message) => {
       token: token,
       userId: Expert._id.toString(),
       role: Expert.role,
-      otp: Expert.otp
+      otp: Expert.otp,
+      fcmToken: Expert.fcmToken
 
     };
   
